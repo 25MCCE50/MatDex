@@ -1,0 +1,1074 @@
+<!DOCTYPE html>
+<html lang="en" class="light">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MatDex - Material Science Dictionary</title>
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        slate: {
+                            50: '#f8fafc',
+                            100: '#f1f5f9',
+                            200: '#e2e8f0',
+                            300: '#cbd5e1',
+                            400: '#94a3b8',
+                            500: '#64748b',
+                            600: '#475569',
+                            700: '#334155',
+                            800: '#1e293b',
+                            900: '#0f172a',
+                        },
+                        brand: {
+                            50: 'rgb(var(--brand-50) / <alpha-value>)',
+                            100: 'rgb(var(--brand-100) / <alpha-value>)',
+                            300: 'rgb(var(--brand-300) / <alpha-value>)',
+                            400: 'rgb(var(--brand-400) / <alpha-value>)',
+                            500: 'rgb(var(--brand-500) / <alpha-value>)',
+                            600: 'rgb(var(--brand-600) / <alpha-value>)',
+                            700: 'rgb(var(--brand-700) / <alpha-value>)',
+                            800: 'rgb(var(--brand-800) / <alpha-value>)',
+                            900: 'rgb(var(--brand-900) / <alpha-value>)',
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'system-ui', 'sans-serif'],
+                        serif: ['Merriweather', 'serif'],
+                    }
+                }
+            }
+        }
+    </script>
+
+    <!-- Google Fonts -->
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Merriweather:ital,wght@0,300;0,400;0,700;1,400&display=swap"
+        rel="stylesheet">
+
+    <!-- React and ReactDOM -->
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+
+    <!-- Babel for JSX -->
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+    <!-- Framer Motion -->
+    <script src="https://unpkg.com/framer-motion@10.16.4/dist/framer-motion.js"></script>
+
+    <!-- Data -->
+    <!-- Data -->
+    <script src="allData.js"></script>
+
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+            /* App handles scrolling */
+        }
+
+        .hide-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+
+        .hide-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+
+        /* Custom scrollbar */
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background-color: #cbd5e1;
+            border-radius: 20px;
+        }
+
+        .dark .custom-scrollbar::-webkit-scrollbar-thumb {
+            background-color: #475569;
+        }
+    </style>
+</head>
+
+<body class="bg-slate-50 text-slate-900 dark:bg-slate-900 dark:text-slate-100 transition-colors duration-300">
+    <div id="root"></div>
+    <script type="text/babel" data-type="module">
+        const { useState, useEffect, useMemo, useRef } = React;
+        const { motion, AnimatePresence } = window.Motion;
+
+        // --- Icons ---
+        const SearchIcon = () => <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>;
+        const MoonIcon = () => <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" /></svg>;
+        const SunIcon = () => <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" /></svg>;
+        const CopyIcon = () => <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2 2v8a2 2 0 002 2z" /></svg>;
+        const CheckIcon = () => <svg className="w-5 h-5 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>;
+        const CloseIcon = () => <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>;
+        const SettingsIcon = () => <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" /><circle cx="12" cy="12" r="3" /></svg>;
+
+        const CATEGORIES = ["All", "Materials", "Properties", "Processes", "Laws", "Formulas", "Miscellaneous"];
+        const ALPHABETS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("");
+
+        const MANUAL_CATEGORIES = {
+            "Laws": ["ohm's law", "fick's law", "fick's first law", "fick's second law", "bragg's law"],
+            "Formulas": ["arrhenius equation", "hall-petch equation"],
+            "Processes": ["annealing", "casting", "cold working", "diffusion", "extrusion", "forging", "heat treatment", "hot isostatic pressing", "hot working", "natural aging", "normalizing", "nucleation", "oxidation", "phase transformation", "precipitation hardening", "processing", "quenching", "recrystallization", "reduction", "rolling", "sintering", "solution treatment", "tempering", "work hardening", "zone refining", "atomization", "slip"],
+            "Properties": ["absorption", "allotropy", "anelastic deformation", "anisotropic", "brittle fracture", "creep", "elastic deformation", "fatigue", "hardness", "impact energy", "isotropic", "modulus of elasticity", "paramagnetism", "passivity", "permeability", "permittivity", "photoconductivity", "poisson's ratio", "polarization", "polymorphism", "property", "resistivity", "shear stress", "specific heat", "strain hardening", "stress", "tensile strength", "thermal conductivity", "thermal expansion", "toughness", "viscosity", "wear", "yield strength", "young's modulus", "rupture"],
+            "Materials": ["abrasive", "adhesive", "alloy", "austenite", "bainite", "ceramic", "composite", "composite material", "ferrous metal", "homopolymer", "insulator", "martensite", "nanocarbon", "nanocomposite", "network polymer", "nonferrous alloy", "n-type semiconductor", "particle-reinforced composite", "pearlite", "polymer", "polymer-matrix composite", "precipitate", "p-type semiconductor", "refractory", "reinforced concrete", "sacrificial anode", "semiconductor", "steel", "superalloy", "thermoplastic", "thermoset", "biomaterial", "plasticizer"]
+        };
+
+        function getCategoryForTerm(term) {
+            const t = term.toLowerCase();
+            for (const [category, terms] of Object.entries(MANUAL_CATEGORIES)) {
+                if (terms.includes(t)) return category;
+            }
+            if (t.includes('law')) return 'Laws';
+            if (t.includes('equation') || t.includes('formula')) return 'Formulas';
+            return 'Miscellaneous'; // Default
+        }
+
+        function WikipediaImage({ term, onUrlFound }) {
+            const [imgSrc, setImgSrc] = React.useState(null);
+
+            React.useEffect(() => {
+                setImgSrc(null);
+                const cleanTerm = term.split(' (')[0].split(' - ')[0];
+
+                fetch(`https://en.wikipedia.org/w/api.php?action=opensearch&search=${encodeURIComponent(cleanTerm)}&limit=1&format=json&origin=*`)
+                    .then(r => r.json())
+                    .then(d => {
+                        if (d[3] && d[3].length > 0) {
+                            const url = d[3][0];
+                            const title = d[1][0];
+                            if (onUrlFound) onUrlFound(url);
+                            
+                            fetch(`https://en.wikipedia.org/api/rest_v1/page/media-list/${encodeURIComponent(title)}`)
+                                .then(r => r.json())
+                                .then(md => {
+                                    if (md && md.items) {
+                                        const HUMAN_KEYWORDS = ['person', 'people', 'portrait', 'biography', 'politician', 'scientist', 'author', 'actor', 'actress', 'musician', 'athlete', 'born', 'died', 'american', 'british', 'french', 'german', 'professor', 'doctor', 'philosopher'];
+                                        const IGNORE_FILES = ['ambox', 'wikidata', 'commons-logo', 'folder', 'symbol', 'icon', 'stub', 'flag'];
+                                        
+                                        for (const item of md.items) {
+                                            if (item.type !== 'image') continue;
+                                            
+                                            const lowerTitle = (item.title || '').toLowerCase();
+                                            const isIcon = IGNORE_FILES.some(kw => lowerTitle.includes(kw)) || lowerTitle.endsWith('.svg');
+                                            if (isIcon) continue;
+
+                                            const captionHtml = item.caption && item.caption.text ? item.caption.text.toLowerCase() : '';
+                                            const likelyHuman = HUMAN_KEYWORDS.some(kw => captionHtml.includes(kw));
+                                            
+                                            if (!likelyHuman) {
+                                                if (item.srcset && item.srcset.length > 0) {
+                                                    setImgSrc(item.srcset[item.srcset.length - 1].src);
+                                                    break;
+                                                }
+                                            }
+                                        }
+                                    }
+                                });
+                        } else {
+                            if (onUrlFound) onUrlFound(null);
+                        }
+                    })
+                    .catch(() => {
+                        if (onUrlFound) onUrlFound(null);
+                    });
+            }, [term, onUrlFound]);
+
+            if (!imgSrc) return null;
+            return (
+                <div className="relative mt-6 rounded-xl overflow-hidden border border-slate-200 dark:border-slate-700 shadow-md flex items-center justify-center bg-slate-100 dark:bg-slate-900" style={{ maxHeight: '280px' }}>
+                    <img src={imgSrc} alt={term} className="h-full max-h-64 w-auto object-contain" style={{ display: 'block', margin: '0 auto' }} />
+                    <div className="absolute bottom-0 right-0 text-[10px] text-slate-400 dark:text-slate-500 px-2 py-0.5 bg-white/70 dark:bg-slate-900/70 rounded-tl">Image via Wikipedia</div>
+                </div>
+            );
+        }
+
+        // Fuzzy search: Levenshtein distance
+        function levenshtein(a, b) {
+            const m = a.length, n = b.length;
+            const dp = Array.from({length: m+1}, (_, i) => Array.from({length: n+1}, (_, j) => i === 0 ? j : j === 0 ? i : 0));
+            for (let i = 1; i <= m; i++) for (let j = 1; j <= n; j++)
+                dp[i][j] = a[i-1] === b[j-1] ? dp[i-1][j-1] : 1 + Math.min(dp[i-1][j], dp[i][j-1], dp[i-1][j-1]);
+            return dp[m][n];
+        }
+        function fuzzyMatch(term, query) {
+            const t = term.toLowerCase(), q = query.toLowerCase();
+            if (t.includes(q)) return true;
+            if (q.length >= 5) {
+                const words = t.split(/\s+/);
+                return words.some(w => levenshtein(w, q) <= Math.floor(q.length / 4));
+            }
+            return false;
+        }
+
+        const PALETTES = {
+            blue: {
+                50: '238 242 255', 100: '224 231 255', 300: '165 180 252', 400: '129 140 248',
+                500: '99 102 241', 600: '79 70 229', 700: '67 56 202', 800: '55 48 163', 900: '49 46 129'
+            },
+            green: {
+                50: '240 253 244', 100: '220 252 231', 300: '134 239 172', 400: '74 222 128',
+                500: '34 197 94', 600: '22 163 74', 700: '21 128 61', 800: '22 101 52', 900: '20 83 45'
+            },
+            yellow: {
+                50: '254 252 232', 100: '254 249 195', 300: '253 224 71', 400: '250 204 21',
+                500: '234 179 8', 600: '202 138 4', 700: '161 98 7', 800: '133 77 14', 900: '113 63 18'
+            }
+        };
+
+        const THEMES = {
+            'white-blue':   { name: 'Light Blue',    bg: '#f8fafc', accent: '#6366f1', c1: '#f8fafc', c2: '#6366f1', dark: false, palette: PALETTES.blue },
+            'black-blue':   { name: 'Dark Blue',     bg: '#0f172a', accent: '#6366f1', c1: '#0f172a', c2: '#6366f1', dark: true,  palette: PALETTES.blue },
+            'light-green':  { name: 'Light Green',   bg: '#f0fdf4', accent: '#22c55e', c1: '#f0fdf4', c2: '#22c55e', dark: false, palette: PALETTES.green },
+            'dark-green':   { name: 'Dark Green',    bg: '#052e16', accent: '#4ade80', c1: '#052e16', c2: '#4ade80', dark: true,  palette: PALETTES.green },
+            'light-yellow': { name: 'Pastel Yellow', bg: '#fefce8', accent: '#eab308', c1: '#fefce8', c2: '#eab308', dark: false, palette: PALETTES.yellow },
+            'dark-yellow':  { name: 'Dark Yellow',   bg: '#1c1400', accent: '#facc15', c1: '#1c1400', c2: '#facc15', dark: true,  palette: PALETTES.yellow },
+        };
+
+        function App() {
+            const [searchInput, setSearchInput] = useState('');      // raw typed text
+            const [activeSearch, setActiveSearch] = useState('');    // committed search (drives grid)
+            const [suggestions, setSuggestions] = useState([]);
+            const [showSuggestions, setShowSuggestions] = useState(false);
+            const searchRef = useRef(null);
+            const suggestionsRef = useRef(null);
+
+            const [selectedCategory, setSelectedCategory] = useState('All');
+            const [selectedAlphabet, setSelectedAlphabet] = useState(null);
+
+            const [wikiUrl, setWikiUrl] = useState(undefined); // undefined = loading, null = not found, string = found
+            const [selectedTerm, setSelectedTerm] = useState(null);
+            const [selectedSubGroup, setSelectedSubGroup] = useState(null);
+            const [copied, setCopied] = useState(false);
+
+            const [isChatOpen, setIsChatOpen] = useState(false);
+            const [chatMessages, setChatMessages] = useState([]);
+            const [chatInput, setChatInput] = useState('');
+            const [isChatLoading, setIsChatLoading] = useState(false);
+            const chatEndRef = useRef(null);
+            const [bookmarks, setBookmarks] = useState(() => {
+                try { return JSON.parse(localStorage.getItem('matdex-bookmarks') || '[]'); } catch { return []; }
+            });
+            const [activeTab, setActiveTab] = useState('dictionary');
+
+            // Settings
+            const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+            const [fontSize, setFontSize] = useState(() => localStorage.getItem('matdex-fontsize') || 'medium');
+            const [theme, setTheme] = useState(() => localStorage.getItem('matdex-theme') || 'white-blue');
+
+
+            useEffect(() => {
+                if (chatEndRef.current) {
+                    chatEndRef.current.scrollIntoView({ behavior: 'smooth' });
+                }
+            }, [chatMessages]);
+
+            const toggleBookmark = (item) => {
+                setBookmarks(prev => {
+                    const exists = prev.some(b => b.term === item.term);
+                    const next = exists ? prev.filter(b => b.term !== item.term) : [...prev, item];
+                    localStorage.setItem('matdex-bookmarks', JSON.stringify(next));
+                    return next;
+                });
+            };
+
+            const handleSendChatMessage = async (msg = null) => {
+                const messageToSend = typeof msg === 'string' ? msg : chatInput;
+                if (!messageToSend.trim() || isChatLoading) return;
+
+                const history = chatMessages.filter(m => !m.error);
+                setChatMessages(prev => [...prev, { role: 'user', content: messageToSend }]);
+                setChatInput('');
+                setIsChatLoading(true);
+
+                // Placeholder for streaming
+                setChatMessages(prev => [...prev, { role: 'assistant', content: '', streaming: true }]);
+
+                try {
+                    const response = await fetch('http://localhost:3000/api/chat', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ message: messageToSend, history })
+                    });
+
+                    if (!response.ok) {
+                        throw new Error(`Server error: ${response.status}`);
+                    }
+
+                    const reader = response.body.getReader();
+                    const decoder = new TextDecoder();
+                    let buffer = '';
+
+                    while (true) {
+                        const { value, done } = await reader.read();
+                        if (done) break;
+                        buffer += decoder.decode(value, { stream: true });
+                        const lines = buffer.split('\n');
+                        buffer = lines.pop();
+                        for (const line of lines) {
+                            if (line.startsWith('data: ') && line !== 'data: [DONE]') {
+                                try {
+                                    const parsed = JSON.parse(line.substring(6));
+                                    if (parsed.content) {
+                                        setChatMessages(prev => {
+                                            const updated = [...prev];
+                                            const last = updated[updated.length - 1];
+                                            if (last && last.streaming) {
+                                                updated[updated.length - 1] = { ...last, content: last.content + parsed.content };
+                                            }
+                                            return updated;
+                                        });
+                                    }
+                                    if (parsed.error) {
+                                        setChatMessages(prev => {
+                                            const updated = [...prev];
+                                            updated[updated.length - 1] = { role: 'assistant', content: `Error: ${parsed.error}`, error: true };
+                                            return updated;
+                                        });
+                                    }
+                                } catch(e) { /* skip partial */ }
+                            }
+                        }
+                    }
+                    // Mark streaming done
+                    setChatMessages(prev => {
+                        const updated = [...prev];
+                        const last = updated[updated.length - 1];
+                        if (last && last.streaming) updated[updated.length - 1] = { ...last, streaming: false };
+                        return updated;
+                    });
+                } catch (error) {
+                    setChatMessages(prev => {
+                        const updated = [...prev];
+                        updated[updated.length - 1] = { role: 'assistant', content: `Error: ${error.message}`, error: true };
+                        return updated;
+                    });
+                } finally {
+                    setIsChatLoading(false);
+                }
+            };
+
+            const openDetailedChat = (term) => {
+                setSelectedTerm(null);
+                setIsChatOpen(true);
+                setTimeout(() => handleSendChatMessage(`Give a detailed definition of ${term}`), 200);
+            };
+
+            const prevTermRef = useRef(null);
+            if (selectedTerm) {
+                prevTermRef.current = selectedTerm;
+            }
+            const displayTerm = selectedTerm || prevTermRef.current;
+
+            // Wikipedia image fetch helper
+            const getWikipediaImageUrl = (term) =>
+                `https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(term.split(' (')[0].split(' - ')[0])}`;
+
+            useEffect(() => {
+                if (selectedTerm && selectedTerm.groupDetails && selectedTerm.groupDetails.length > 0) {
+                    setSelectedSubGroup(selectedTerm.groupDetails[0].group);
+                } else {
+                    setSelectedSubGroup(null);
+                }
+            }, [selectedTerm]);
+
+            // Add categories to data and sort
+            const data = useMemo(() => {
+                return (typeof allMatDexData !== 'undefined' ? allMatDexData : []).sort((a, b) => a.term.localeCompare(b.term));
+            }, []);
+
+            // Autocomplete: update suggestions as user types
+            useEffect(() => {
+                if (searchInput.trim().length < 2) { setSuggestions([]); return; }
+                const q = searchInput.toLowerCase();
+                const matches = data
+                    .filter(item => fuzzyMatch(item.term, q))
+                    .sort((a, b) => {
+                        const aExact = a.term.toLowerCase().startsWith(q) ? 0 : 1;
+                        const bExact = b.term.toLowerCase().startsWith(q) ? 0 : 1;
+                        return aExact - bExact || a.term.localeCompare(b.term);
+                    })
+                    .slice(0, 5);
+                setSuggestions(matches);
+            }, [searchInput, data]);
+
+            // Click outside to close suggestions
+            useEffect(() => {
+                const handler = (e) => {
+                    if (searchRef.current && !searchRef.current.contains(e.target)) {
+                        setShowSuggestions(false);
+                    }
+                };
+                document.addEventListener('mousedown', handler);
+                return () => document.removeEventListener('mousedown', handler);
+            }, []);
+
+            // Filter data by committed search, category, alphabet
+            const filteredData = useMemo(() => {
+                return data.filter(item => {
+                    const matchSearch = activeSearch ? fuzzyMatch(item.term, activeSearch) || item.definition.toLowerCase().includes(activeSearch.toLowerCase()) : true;
+                    const matchCat = selectedCategory === 'All' ? true : item.category === selectedCategory;
+                    const matchAlpha = selectedAlphabet ? item.term.toUpperCase().startsWith(selectedAlphabet) : true;
+                    return matchSearch && matchCat && matchAlpha;
+                });
+            }, [data, activeSearch, selectedCategory, selectedAlphabet]);
+
+            // Theme + font size effect
+            useEffect(() => {
+                const t = THEMES[theme] || THEMES['white-blue'];
+                if (t.dark) {
+                    document.documentElement.classList.add('dark');
+                } else {
+                    document.documentElement.classList.remove('dark');
+                }
+                document.documentElement.style.setProperty('--theme-bg', t.bg);
+                document.documentElement.style.setProperty('--theme-accent', t.accent);
+                if (t.palette) {
+                    Object.entries(t.palette).forEach(([shade, rgb]) => {
+                        document.documentElement.style.setProperty(`--brand-${shade}`, rgb);
+                    });
+                }
+                localStorage.setItem('matdex-theme', theme);
+
+                const sizes = { small: '13px', medium: '15px', large: '17px' };
+                document.documentElement.style.fontSize = sizes[fontSize] || '15px';
+                localStorage.setItem('matdex-fontsize', fontSize);
+            }, [theme, fontSize]);
+
+            const handleCopy = (text) => {
+                navigator.clipboard.writeText(text).then(() => {
+                    setCopied(true);
+                    setTimeout(() => setCopied(false), 2000);
+                });
+            };
+
+            const toggleAlphabet = (letter) => {
+                setSelectedAlphabet(prev => prev === letter ? null : letter);
+            };
+
+            // Prevent scrolling on body when modal is open
+            useEffect(() => {
+                if (selectedTerm) {
+                    document.body.style.overflow = 'hidden';
+                    setWikiUrl(undefined); // Reset wiki URL state when opening a new term
+                } else {
+                    document.body.style.overflow = 'hidden'; // Keep body hidden, app handles scroll
+                }
+            }, [selectedTerm]);
+
+            // Handle Keyboard Shortcuts
+            useEffect(() => {
+                const handleKeyDown = (e) => {
+                    // Escape closes the modal
+                    if (e.key === 'Escape') {
+                        setSelectedTerm(null);
+                    }
+                    // '/' or 'Ctrl+K' / 'Cmd+K' focuses search
+                    if (e.key === '/' || ((e.metaKey || e.ctrlKey) && e.key === 'k')) {
+                        // Prevent default if it's outside input to avoid typing '/' in input right away
+                        if (document.activeElement.id !== 'search-input') {
+                            e.preventDefault();
+                            document.getElementById('search-input')?.focus();
+                        }
+                    }
+                };
+                window.addEventListener('keydown', handleKeyDown);
+                return () => window.removeEventListener('keydown', handleKeyDown);
+            }, []);
+
+
+
+            return (
+                <div className="h-screen w-full flex flex-col bg-slate-50 dark:bg-slate-900 transition-colors duration-300">
+
+                    {/* Header */}
+                    <nav className="flex-none px-6 py-3 bg-white dark:bg-slate-800 border-b border-slate-200 dark:border-slate-700 shadow-sm z-20">
+                        <div className="flex items-center gap-4">
+                            {/* Logo */}
+                            <div className="flex items-center gap-2 flex-none">
+                                <div className="w-8 h-8 rounded-lg bg-brand-500 flex items-center justify-center text-white font-bold text-xl">M</div>
+                                <h1 className="text-xl font-serif font-bold text-slate-800 dark:text-white tracking-tight hidden sm:block">MatDex</h1>
+                            </div>
+
+                            {/* Centered Search */}
+                            <div className="flex-1 flex justify-center">
+                                <div ref={searchRef} className="relative w-full max-w-xl">
+                                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
+                                        <SearchIcon />
+                                    </div>
+                                    <input
+                                        id="search-input"
+                                        type="text"
+                                        placeholder="Search terms… try 'Martensyte'"
+                                        value={searchInput}
+                                        onChange={(e) => { setSearchInput(e.target.value); setShowSuggestions(true); }}
+                                        onKeyDown={(e) => {
+                                            if (e.key === 'Enter') { setActiveSearch(searchInput); setShowSuggestions(false); }
+                                            if (e.key === 'Escape') { setShowSuggestions(false); setSearchInput(''); setActiveSearch(''); }
+                                        }}
+                                        onFocus={() => searchInput.length >= 2 && setShowSuggestions(true)}
+                                        className="block w-full pl-10 pr-16 py-2.5 border border-slate-300 dark:border-slate-600 rounded-full bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-brand-500 transition-all duration-200 text-sm"
+                                    />
+                                    {searchInput && (
+                                        <button onClick={() => { setSearchInput(''); setActiveSearch(''); setShowSuggestions(false); }}
+                                            className="absolute inset-y-0 right-10 flex items-center pr-2 text-slate-400 hover:text-slate-600">
+                                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12"/></svg>
+                                        </button>
+                                    )}
+                                    <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
+                                        <span className="hidden sm:inline text-[10px] font-bold text-slate-400 border border-slate-200 dark:border-slate-600 rounded px-1.5 py-0.5 bg-slate-50 dark:bg-slate-800">/</span>
+                                    </div>
+
+                                    {/* Autocomplete Dropdown */}
+                                    {showSuggestions && suggestions.length > 0 && (
+                                        <div className="absolute top-full mt-2 left-0 right-0 bg-white dark:bg-slate-800 rounded-2xl shadow-2xl border border-slate-200 dark:border-slate-700 overflow-hidden z-50">
+                                            {suggestions.map((item, idx) => (
+                                                <button key={idx}
+                                                    onClick={() => { setSelectedTerm(item); setSearchInput(item.term); setActiveSearch(item.term); setShowSuggestions(false); }}
+                                                    className="w-full flex items-start gap-4 px-6 py-5 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors text-left border-b border-slate-100 dark:border-slate-700/50 last:border-0"
+                                                >
+                                                    <div className="flex-1 min-w-0">
+                                                        <p className="font-bold text-slate-800 dark:text-slate-100 text-lg capitalize">{item.term}</p>
+                                                        <p className="text-sm text-slate-500 dark:text-slate-400 mt-1 line-clamp-2 leading-relaxed">{item.definition}</p>
+                                                    </div>
+                                                    <div className="flex gap-2 mt-1">
+                                                        <span className="text-[11px] font-bold uppercase tracking-wider px-3 py-1 bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-400 rounded-lg flex-none shadow-sm">{item.category}</span>
+                                                    </div>
+                                                </button>
+                                            ))}
+                                        </div>
+                                    )}
+                                </div>
+                            </div>
+
+                            {/* Right buttons */}
+                            <div className="flex items-center gap-2 flex-none">
+                                <button onClick={() => setIsChatOpen(true)}
+                                    className="hidden md:flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-brand-500 to-indigo-500 hover:from-brand-600 hover:to-indigo-600 text-white rounded-full font-medium shadow-md hover:shadow-lg transition-all transform hover:-translate-y-0.5 text-sm"
+                                    title="Open AI Assistant"
+                                >
+                                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" /></svg>
+                                    AI Assistant
+                                </button>
+                                <button onClick={() => setIsSettingsOpen(true)}
+                                    className="p-2 rounded-full hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors text-slate-500 dark:text-slate-400"
+                                    title="Settings"
+                                >
+                                    <SettingsIcon />
+                                </button>
+                            </div>
+                        </div>
+
+                        {/* Tabs + Categories Row */}
+                        <div className="flex items-center gap-4 mt-3">
+                            <div className="flex rounded-full border border-slate-200 dark:border-slate-700 bg-slate-100 dark:bg-slate-800 p-0.5 flex-none">
+                                <button onClick={() => setActiveTab('dictionary')} className={`px-4 py-1 rounded-full text-sm font-semibold transition-all ${activeTab === 'dictionary' ? 'bg-white dark:bg-slate-700 text-brand-600 dark:text-brand-400 shadow-sm' : 'text-slate-500 dark:text-slate-400 hover:text-slate-700'}`}>Dictionary</button>
+                                <button onClick={() => setActiveTab('bookmarks')} className={`flex items-center gap-1.5 px-4 py-1 rounded-full text-sm font-semibold transition-all ${activeTab === 'bookmarks' ? 'bg-white dark:bg-slate-700 text-brand-600 dark:text-brand-400 shadow-sm' : 'text-slate-500 dark:text-slate-400 hover:text-slate-700'}`}>
+                                    <svg className="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24"><path d="M5 3a2 2 0 00-2 2v16l7-3 7 3V5a2 2 0 00-2-2H5z"/></svg>
+                                    Bookmarks {bookmarks.length > 0 && <span className="bg-brand-500 text-white text-[10px] rounded-full w-4 h-4 flex items-center justify-center">{bookmarks.length}</span>}
+                                </button>
+                            </div>
+                            {activeTab === 'dictionary' && (
+                                <div className="flex overflow-x-auto hide-scrollbar gap-2">
+                                    {CATEGORIES.map(cat => (
+                                        <button key={cat} onClick={() => setSelectedCategory(cat)}
+                                            className={`px-4 py-1.5 rounded-full text-sm font-medium whitespace-nowrap transition-colors border ${
+                                                selectedCategory === cat
+                                                    ? 'bg-brand-500 text-white border-brand-500 shadow-md'
+                                                    : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 border-slate-200 dark:border-slate-700 hover:border-brand-300 dark:hover:border-brand-500 hover:text-brand-600 dark:hover:text-brand-400'
+                                            }`}>{cat}
+                                        </button>
+                                    ))}
+                                </div>
+                            )}
+                        </div>
+                    </nav>
+
+                    <div className="flex-1 flex overflow-hidden relative">
+
+                        {/* Alphabet Sidebar (Left) */}
+                        <div className="w-14 flex-none border-r border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 flex flex-col items-center py-4 gap-1 overflow-y-auto hide-scrollbar z-10">
+                            {ALPHABETS.map(letter => {
+                                const isSelected = selectedAlphabet === letter;
+                                return (
+                                    <button
+                                        key={letter}
+                                        onClick={() => toggleAlphabet(letter)}
+                                        className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold transition-all
+                                            ${isSelected
+                                                ? 'bg-brand-500 text-white shadow-md transform scale-110'
+                                                : 'text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700 hover:text-brand-500'
+                                            }`}
+                                    >
+                                        {letter}
+                                    </button>
+                                );
+                            })}
+                        </div>
+
+                        {/* Main Grid Area */}
+                        <div className="flex-1 overflow-y-auto custom-scrollbar bg-slate-50 dark:bg-slate-900 p-6">
+                            {activeTab === 'bookmarks' ? (
+                                bookmarks.length === 0 ? (
+                                    <div className="flex flex-col items-center justify-center h-64 text-slate-400 dark:text-slate-500">
+                                        <svg className="w-12 h-12 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M5 3a2 2 0 00-2 2v16l7-3 7 3V5a2 2 0 00-2-2H5z"/></svg>
+                                        <p className="text-lg font-medium">No bookmarks yet.</p>
+                                        <p className="text-sm mt-1">Click the bookmark icon on any term to save it here.</p>
+                                    </div>
+                                ) : (
+                                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 pb-20">
+                                        {bookmarks.map(item => (
+                                            <motion.div key={item.term} onClick={() => setSelectedTerm(item)}
+                                                className="bg-white dark:bg-slate-800 rounded-2xl p-6 border border-brand-200 dark:border-brand-800 shadow-sm cursor-pointer hover:shadow-lg transition-all group flex flex-col h-full"
+                                                whileHover={{ y: -4 }} whileTap={{ scale: 0.97 }}
+                                            >
+                                                <div className="flex items-start justify-between mb-4">
+                                                    <h3 className="text-xl font-bold text-slate-800 dark:text-slate-100 capitalize group-hover:text-brand-600 transition-colors">{item.term}</h3>
+                                                    <button onClick={(e) => { e.stopPropagation(); toggleBookmark(item); }} className="p-1.5 text-brand-500 hover:text-brand-700 transition-colors" title="Remove bookmark">
+                                                        <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M5 3a2 2 0 00-2 2v16l7-3 7 3V5a2 2 0 00-2-2H5z"/></svg>
+                                                    </button>
+                                                </div>
+                                                <p className="text-sm text-slate-500 dark:text-slate-400 line-clamp-3 leading-relaxed flex-1">{item.definition}</p>
+                                            </motion.div>
+                                        ))}
+                                    </div>
+                                )
+                            ) : (
+                                <>
+                                    <div className="mb-6 text-sm text-slate-500 dark:text-slate-400 font-medium">
+                                        Showing {filteredData.length} terms
+                                        {selectedCategory !== 'All' && <span> in <strong className="text-brand-600 dark:text-brand-400">{selectedCategory}</strong></span>}
+                                        {selectedAlphabet && <span> starting with <strong className="text-brand-600 dark:text-brand-400">{selectedAlphabet}</strong></span>}
+                                    </div>
+                                    {filteredData.length === 0 ? (
+                                        <div className="flex flex-col items-center justify-center h-64 text-center px-4">
+                                            <div className="w-16 h-16 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center mb-4 text-slate-400">
+                                                <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                                            </div>
+                                            <p className="text-lg font-semibold text-slate-700 dark:text-slate-300">No terms found</p>
+                                            <p className="text-sm text-slate-500 dark:text-slate-400 mt-1 max-w-sm">"{activeSearch || ''}" doesn't match anything in our dictionary. Try our AI assistant for instant answers!</p>
+                                            <div className="flex gap-3 mt-5">
+                                                <button onClick={() => { setSelectedCategory('All'); setSelectedAlphabet(null); setActiveSearch(''); setSearchInput(''); }} className="px-4 py-2 text-sm text-brand-500 border border-brand-300 dark:border-brand-600 rounded-xl hover:bg-brand-50 dark:hover:bg-brand-900/20 transition-colors">Clear Filters</button>
+                                                <button onClick={() => { setIsChatOpen(true); setTimeout(() => { const q = activeSearch || searchInput; if (q) { setChatInput(`Explain: ${q}`); } }, 200); }}
+                                                    className="flex items-center gap-2 px-5 py-2 text-sm bg-brand-500 hover:bg-brand-600 text-white rounded-xl font-semibold transition-colors shadow-md">
+                                                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" /></svg>
+                                                    Ask the AI Chatbot
+                                                </button>
+                                            </div>
+                                        </div>
+                                    ) : (
+                                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 pb-20">
+                                            {filteredData.map(item => {
+                                                const isBookmarked = bookmarks.some(b => b.term === item.term);
+                                                return (
+                                                    <motion.div key={item.term} onClick={() => setSelectedTerm(item)}
+                                                        className="bg-white dark:bg-slate-800 rounded-2xl p-6 border border-slate-200 dark:border-slate-700 shadow-sm cursor-pointer hover:shadow-lg hover:border-brand-300 dark:hover:border-brand-600 transition-all group flex flex-col h-full"
+                                                        whileHover={{ y: -4 }} whileTap={{ scale: 0.97 }}
+                                                    >
+                                                        <div className="flex items-start justify-between mb-4">
+                                                            <h3 className="text-xl font-bold text-slate-800 dark:text-slate-100 capitalize group-hover:text-brand-600 dark:group-hover:text-brand-400 transition-colors">{item.term}</h3>
+                                                            <div className="flex items-center gap-1">
+                                                                <button onClick={(e) => { e.stopPropagation(); toggleBookmark(item); }}
+                                                                    className={`p-1.5 rounded-md transition-colors ${isBookmarked ? 'text-brand-500' : 'text-slate-300 dark:text-slate-600 hover:text-brand-400'}`}
+                                                                    title={isBookmarked ? 'Remove bookmark' : 'Bookmark this term'}
+                                                                >
+                                                                    <svg className="w-4 h-4" fill={isBookmarked ? 'currentColor' : 'none'} stroke="currentColor" strokeWidth={isBookmarked ? 0 : 2} viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M5 3a2 2 0 00-2 2v16l7-3 7 3V5a2 2 0 00-2-2H5z"/></svg>
+                                                                </button>
+                                                                <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-1 bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-400 rounded-md">{item.category}</span>
+                                                            </div>
+                                                        </div>
+                                                        <p className="text-sm text-slate-500 dark:text-slate-400 line-clamp-3 leading-relaxed flex-1">{item.definition}</p>
+                                                    </motion.div>
+                                                );
+                                            })}
+                                        </div>
+                                    )}
+                                </>
+                            )}
+                        </div>
+                    </div>
+
+                    {/* Modal Overlay */}
+                    <AnimatePresence>
+                        {selectedTerm && (
+                            <motion.div
+                                key="backdrop"
+                                className="fixed inset-0 bg-slate-900/40 dark:bg-black/60 backdrop-blur-sm z-40"
+                                initial={{ opacity: 0 }}
+                                animate={{ opacity: 1 }}
+                                exit={{ opacity: 0 }}
+                                onClick={() => setSelectedTerm(null)}
+                            />
+                        )}
+                    </AnimatePresence>
+
+                    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 md:p-8 pointer-events-none">
+                        <AnimatePresence>
+                            {selectedTerm && displayTerm && (
+                                <motion.div
+                                    key="modal-card"
+                                    initial={{ opacity: 0, scale: 0.95, y: 20 }}
+                                    animate={{ opacity: 1, scale: 1, y: 0 }}
+                                    exit={{ opacity: 0, scale: 0.95, y: -20 }}
+                                    transition={{ type: "spring", damping: 25, stiffness: 300 }}
+                                    className="bg-white dark:bg-slate-800 w-full max-w-3xl max-h-full rounded-3xl shadow-2xl border border-slate-200 dark:border-slate-700 flex flex-col pointer-events-auto overflow-hidden"
+                                >
+                                    <div className="flex justify-between items-start p-6 md:p-8 border-b border-slate-100 dark:border-slate-700/50 bg-slate-50/50 dark:bg-slate-800/50">
+                                        <div>
+                                            <span className="text-xs font-bold uppercase tracking-widest text-brand-500 mb-2 block">
+                                                {displayTerm.category}
+                                                {displayTerm.tag && displayTerm.tag !== 'General' && (
+                                                    <>
+                                                        <span className="mx-2 opacity-50">•</span>
+                                                        <span className="text-brand-600 dark:text-brand-400">{displayTerm.tag}</span>
+                                                    </>
+                                                )}
+                                            </span>
+                                            <h2 className="text-3xl md:text-5xl font-serif font-bold text-slate-900 dark:text-white capitalize">
+                                                {displayTerm.term}
+                                            </h2>
+                                        </div>
+                                        <button
+                                            onClick={() => setSelectedTerm(null)}
+                                            className="p-2 bg-slate-100 dark:bg-slate-700 rounded-full text-slate-500 hover:text-slate-800 dark:hover:text-white transition-colors"
+                                        >
+                                            <CloseIcon />
+                                        </button>
+                                    </div>
+
+                                    <div className="p-6 md:p-8 overflow-y-auto custom-scrollbar">
+                                        <div className="space-y-8">
+                                            <div>
+                                                <h4 className="text-sm font-semibold tracking-wider text-slate-400 dark:text-slate-500 uppercase mb-3 flex items-center gap-2">
+                                                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" /></svg>
+                                                    Definition
+                                                </h4>
+                                                <div className="text-xl text-slate-700 dark:text-slate-200 leading-relaxed relative group">
+                                                    {displayTerm.definition}
+
+                                                    <button
+                                                        onClick={() => handleCopy(displayTerm.definition)}
+                                                        className="absolute -right-4 -top-4 p-2 bg-white dark:bg-slate-700 rounded-lg shadow-md opacity-0 group-hover:opacity-100 transition-all flex items-center gap-2 text-sm font-medium text-slate-600 dark:text-slate-300 hover:text-brand-600 dark:hover:text-brand-400 transform translate-y-2 group-hover:translate-y-0"
+                                                        title="Copy to clipboard"
+                                                    >
+                                                        {copied ? <CheckIcon /> : <CopyIcon />}
+                                                        {copied ? 'Copied!' : 'Copy'}
+                                                    </button>
+                                                </div>
+
+                                                {/* Wikipedia Image */}
+                                                <WikipediaImage term={displayTerm.term} onUrlFound={setWikiUrl} />
+                                            </div>
+
+                                            {displayTerm.groupDetails && displayTerm.groupDetails.length > 0 && (
+                                                <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 }}>
+                                                    <h4 className="text-sm font-semibold tracking-wider text-slate-400 dark:text-slate-500 uppercase mb-3 flex items-center gap-2">
+                                                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" /></svg>
+                                                        Element Categories
+                                                    </h4>
+                                                    <div className="flex flex-wrap gap-2 mb-4">
+                                                        {displayTerm.groupDetails.map((gd, idx) => (
+                                                            <button
+                                                                key={idx}
+                                                                onClick={() => setSelectedSubGroup(gd.group)}
+                                                                className={`px-4 py-2 rounded-xl text-sm font-semibold transition-colors border ${selectedSubGroup === gd.group ? 'bg-brand-500 text-white border-brand-500 shadow-sm' : 'bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 border-transparent hover:border-slate-300 dark:hover:border-slate-500'}`}
+                                                            >
+                                                                {gd.group}
+                                                            </button>
+                                                        ))}
+                                                    </div>
+                                                    <div className="p-4 md:p-6 bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-700 dark:text-slate-300 leading-relaxed text-lg">
+                                                        {displayTerm.groupDetails.find(g => g.group === selectedSubGroup)?.details}
+                                                    </div>
+                                                </motion.div>
+                                            )}
+
+                                            {displayTerm.formula && (
+                                                <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.05 }}>
+                                                    <h4 className="text-sm font-semibold tracking-wider text-slate-400 dark:text-slate-500 uppercase mb-3 flex items-center gap-2">
+                                                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z" /></svg>
+                                                        Formula / Equation
+                                                    </h4>
+                                                    <div className="bg-slate-100 dark:bg-slate-900 rounded-xl p-4 md:p-6 border border-slate-200 dark:border-slate-800">
+                                                        <code className="text-lg md:text-xl font-mono text-brand-600 dark:text-brand-400">{displayTerm.formula}</code>
+                                                    </div>
+                                                </motion.div>
+                                            )}
+
+                                            {displayTerm.applications && displayTerm.applications.length > 0 && (
+                                                <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
+                                                    <h4 className="text-sm font-semibold tracking-wider text-slate-400 dark:text-slate-500 uppercase mb-3 flex items-center gap-2">
+                                                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" /></svg>
+                                                        Applications
+                                                    </h4>
+                                                    <div className="flex flex-wrap gap-2">
+                                                        {displayTerm.applications.map((app, idx) => (
+                                                            <span key={idx} className="px-4 py-2 bg-brand-50 dark:bg-brand-900/30 text-brand-700 dark:text-brand-300 rounded-xl text-sm font-semibold border border-brand-100 dark:border-brand-800/50">
+                                                                {app}
+                                                            </span>
+                                                        ))}
+                                                    </div>
+                                                </motion.div>
+                                            )}
+
+                                            {displayTerm.related_terms && displayTerm.related_terms.length > 0 && (
+                                                <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}>
+                                                    <h4 className="text-sm font-semibold tracking-wider text-slate-400 dark:text-slate-500 uppercase mb-3 flex items-center gap-2">
+                                                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" /></svg>
+                                                        Related Terms
+                                                    </h4>
+                                                    <div className="flex flex-wrap gap-2">
+                                                        {displayTerm.related_terms.map((rel, idx) => (
+                                                            <span
+                                                                key={idx}
+                                                                onClick={() => {
+                                                                    const targetTerm = data.find(t => t.term.toLowerCase() === rel.toLowerCase());
+                                                                    if (targetTerm) {
+                                                                        setSelectedCategory('All');
+                                                                        setSelectedAlphabet(null);
+                                                                        setSearchTerm('');
+                                                                        setSelectedTerm(targetTerm);
+                                                                    }
+                                                                }}
+                                                                className="px-4 py-2 bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-300 rounded-xl text-sm font-semibold cursor-pointer hover:bg-slate-200 dark:hover:bg-slate-600 transition-colors border border-transparent hover:border-slate-300 dark:hover:border-slate-500"
+                                                            >
+                                                                {rel}
+                                                            </span>
+                                                        ))}
+                                                    </div>
+                                                </motion.div>
+                                            )}
+                                        </div>
+
+                                        <div className="mt-8 pt-6 border-t border-slate-100 dark:border-slate-700/50 flex justify-between items-center gap-4 flex-wrap">
+                                            <button
+                                                onClick={() => openDetailedChat(displayTerm.term)}
+                                                className="flex items-center gap-2 px-6 py-3 bg-brand-500 hover:bg-brand-600 text-white rounded-xl font-semibold transition-all shadow-md hover:shadow-lg hover:-translate-y-0.5"
+                                            >
+                                                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" /></svg>
+                                                More detailed with AI
+                                            </button>
+                                            <div className="flex flex-col items-end gap-1">
+                                                {wikiUrl === null ? (
+                                                    <button disabled className="flex items-center gap-2 px-6 py-3 bg-slate-300 dark:bg-slate-700 text-slate-500 dark:text-slate-400 rounded-xl font-semibold cursor-not-allowed">
+                                                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" /></svg>
+                                                        No Wikipedia URL found
+                                                    </button>
+                                                ) : (
+                                                    <a
+                                                        href={wikiUrl || '#'}
+                                                        target={wikiUrl ? "_blank" : undefined}
+                                                        rel="noopener noreferrer"
+                                                        className={`flex items-center gap-2 px-6 py-3 rounded-xl font-semibold transition-all shadow-md ${wikiUrl ? 'bg-slate-900 dark:bg-brand-500 hover:bg-brand-600 dark:hover:bg-brand-400 text-white hover:shadow-lg hover:-translate-y-0.5' : 'bg-slate-400 dark:bg-slate-600 text-white/70 animate-pulse cursor-wait'}`}
+                                                        onClick={(e) => { if (!wikiUrl) e.preventDefault(); }}
+                                                    >
+                                                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" /></svg>
+                                                        {wikiUrl === undefined ? 'Searching Wikipedia...' : 'Read on Wikipedia'}
+                                                    </a>
+                                                )}
+                                                <span className="text-[10px] text-slate-400 dark:text-slate-500 italic pr-2">Note: Some technical terms may not have a Wikipedia page.</span>
+                                            </div>
+                                        </div>
+
+                                    </div>
+                                </motion.div>
+                            )}
+                        </AnimatePresence>
+                    </div>
+
+                    {/* Chat Sidebar Overlay */}
+                    <AnimatePresence>
+                        {isChatOpen && (
+                            <motion.div
+                                initial={{ opacity: 0 }}
+                                animate={{ opacity: 1 }}
+                                exit={{ opacity: 0 }}
+                                onClick={() => setIsChatOpen(false)}
+                                className="fixed inset-0 bg-slate-900/20 dark:bg-black/40 backdrop-blur-sm z-50"
+                            />
+                        )}
+                    </AnimatePresence>
+
+                    {/* Chat Sidebar */}
+                    <AnimatePresence>
+                        {isChatOpen && (
+                            <motion.div
+                                initial={{ x: '100%' }}
+                                animate={{ x: 0 }}
+                                exit={{ x: '100%' }}
+                                transition={{ type: 'spring', damping: 25, stiffness: 200 }}
+                                className="fixed top-0 right-0 h-full w-full sm:w-[450px] lg:w-[500px] bg-white dark:bg-slate-800 shadow-2xl z-50 flex flex-col border-l border-slate-200 dark:border-slate-700"
+                            >
+                                <div className="p-4 border-b border-slate-200 dark:border-slate-700 flex justify-between items-center bg-slate-50 dark:bg-slate-900">
+                                    <div className="flex items-center gap-3">
+                                        <div className="w-8 h-8 rounded-full bg-brand-100 dark:bg-brand-900/30 flex items-center justify-center text-brand-600 dark:text-brand-400">
+                                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" /></svg>
+                                        </div>
+                                        <div>
+                                            <h3 className="font-bold text-slate-800 dark:text-white leading-tight">MatDex AI Assistant</h3>
+                                <p className="text-xs text-slate-500 dark:text-slate-400">Powered by Llama 3.1 70B · Streaming</p>
+                                        </div>
+                                    </div>
+                                    <button onClick={() => setIsChatOpen(false)} className="p-2 text-slate-500 hover:text-slate-800 dark:hover:text-white bg-slate-100 hover:bg-slate-200 dark:bg-slate-700 dark:hover:bg-slate-600 rounded-full transition-colors">
+                                        <CloseIcon />
+                                    </button>
+                                </div>
+
+                                <div className="flex-1 overflow-y-auto p-4 space-y-6 custom-scrollbar bg-slate-50 dark:bg-slate-900/50">
+                                    {chatMessages.length === 0 && (
+                                        <div className="text-center text-slate-500 dark:text-slate-400 mt-10">
+                                            <div className="w-16 h-16 bg-slate-200 dark:bg-slate-700 rounded-full flex items-center justify-center mx-auto mb-4">
+                                                <svg className="w-8 h-8 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z" /></svg>
+                                            </div>
+                                            <p className="font-semibold text-slate-700 dark:text-slate-300">Hello! I am your Materials Science Professor.</p>
+                                            <p className="text-sm mt-2 max-w-[250px] mx-auto">Ask me anything about materials, structures, processes, or engineering properties.</p>
+                                        </div>
+                                    )}
+                                    {chatMessages.map((msg, idx) => (
+                                        <div key={idx} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
+                                            {msg.role === 'assistant' && (
+                                                <div className="w-8 h-8 rounded-full bg-indigo-100 dark:bg-indigo-900/50 flex-shrink-0 flex items-center justify-center text-indigo-600 dark:text-indigo-400 mr-2 mt-auto">
+                                                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" /></svg>
+                                                </div>
+                                            )}
+                                            <div className={`max-w-[80%] rounded-2xl p-4 ${
+                                                msg.role === 'user'
+                                                ? 'bg-brand-500 text-white rounded-br-none'
+                                                : msg.error
+                                                    ? 'bg-red-50 text-red-600 border border-red-200 dark:bg-red-900/30 dark:text-red-400 dark:border-red-800 rounded-bl-none'
+                                                    : 'bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-200 border border-slate-200 dark:border-slate-700 rounded-bl-none shadow-sm'
+                                            }`}>
+                                                {msg.role === 'assistant' && !msg.content && msg.streaming ? (
+                                                    <div className="flex gap-1.5 items-center h-4 py-2">
+                                                        <div className="w-1.5 h-1.5 bg-brand-400 rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></div>
+                                                        <div className="w-1.5 h-1.5 bg-brand-400 rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></div>
+                                                        <div className="w-1.5 h-1.5 bg-brand-400 rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></div>
+                                                    </div>
+                                                ) : (
+                                                    <p className="whitespace-pre-wrap text-[15px] leading-relaxed font-serif">
+                                                        {msg.content}
+                                                        {msg.streaming && <span className="inline-block w-0.5 h-4 bg-current ml-0.5 animate-pulse align-middle" />}
+                                                    </p>
+                                                )}
+                                            </div>
+                                        </div>
+                                    ))}
+                                    <div ref={chatEndRef} />
+                                </div>
+
+                                <div className="p-4 border-t border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800">
+                                    <div className="flex gap-2">
+                                        <input
+                                            type="text"
+                                            value={chatInput}
+                                            onChange={(e) => setChatInput(e.target.value)}
+                                            onKeyDown={(e) => {
+                                                if (e.key === 'Enter') {
+                                                    handleSendChatMessage();
+                                                }
+                                            }}
+                                            placeholder="Ask a materials science question..."
+                                            disabled={isChatLoading}
+                                            className="flex-1 px-4 py-3 bg-slate-100 dark:bg-slate-700/50 border border-transparent focus:border-brand-500 dark:focus:border-brand-500 rounded-xl outline-none text-slate-800 dark:text-slate-100 transition-colors placeholder-slate-400 text-[15px] disabled:opacity-60 disabled:cursor-not-allowed"
+                                        />
+                                        <button
+                                            onClick={() => handleSendChatMessage()}
+                                            disabled={isChatLoading || !chatInput.trim()}
+                                            className="p-3 bg-brand-500 hover:bg-brand-600 disabled:opacity-50 disabled:bg-slate-300 disabled:cursor-not-allowed text-white rounded-xl transition-colors shadow-sm flex items-center justify-center"
+                                        >
+                                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" /></svg>
+                                        </button>
+                                    </div>
+                                </div>
+                            </motion.div>
+                        )}
+                    </AnimatePresence>
+
+                    {/* Settings Panel */}
+                    <AnimatePresence>
+                        {isSettingsOpen && (
+                            <>
+                                <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+                                    onClick={() => setIsSettingsOpen(false)}
+                                    className="fixed inset-0 bg-black/40 backdrop-blur-sm z-50"
+                                />
+                                <motion.div initial={{ opacity: 0, scale: 0.95, y: 10 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.95, y: 10 }}
+                                    transition={{ type: 'spring', damping: 28, stiffness: 300 }}
+                                    className="fixed inset-0 m-auto h-fit max-h-[85vh] w-[90%] max-w-md bg-white dark:bg-slate-800 rounded-2xl shadow-2xl flex flex-col z-50 overflow-hidden border border-slate-200 dark:border-slate-700"
+                                >
+                                    <div className="flex items-center justify-between px-6 py-4 border-b border-slate-100 dark:border-slate-700">
+                                        <div className="flex items-center gap-2">
+                                            <SettingsIcon />
+                                            <h2 className="text-lg font-bold text-slate-800 dark:text-white">Settings</h2>
+                                        </div>
+                                        <button onClick={() => setIsSettingsOpen(false)} className="p-2 rounded-full hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-500 dark:text-slate-400 transition-colors"><CloseIcon /></button>
+                                    </div>
+                                    <div className="flex-1 overflow-y-auto custom-scrollbar p-6 space-y-8">
+                                        {/* Font Size */}
+                                        <div>
+                                            <h3 className="text-sm font-semibold uppercase tracking-wider text-slate-400 dark:text-slate-500 mb-4">Font Size</h3>
+                                            <div className="flex gap-3">
+                                                {[
+                                                    { key: 'small', label: 'Small', preview: 'Aa', size: 'text-sm' },
+                                                    { key: 'medium', label: 'Medium', preview: 'Aa', size: 'text-base' },
+                                                    { key: 'large', label: 'Large', preview: 'Aa', size: 'text-xl' },
+                                                ].map(f => (
+                                                    <button key={f.key} onClick={() => setFontSize(f.key)}
+                                                        className={`flex-1 flex flex-col items-center gap-1.5 px-3 py-3 rounded-xl border-2 transition-all ${fontSize === f.key ? 'border-brand-500 bg-brand-50 dark:bg-brand-900/20' : 'border-slate-200 dark:border-slate-700 hover:border-brand-300'}`}>
+                                                        <span className={`font-bold text-slate-800 dark:text-white ${f.size}`}>{f.preview}</span>
+                                                        <span className="text-xs text-slate-500 dark:text-slate-400">{f.label}</span>
+                                                        {fontSize === f.key && <div className="w-2 h-2 rounded-full bg-brand-500" />}
+                                                    </button>
+                                                ))}
+                                            </div>
+                                        </div>
+
+                                        {/* Color Theme */}
+                                        <div>
+                                            <h3 className="text-sm font-semibold uppercase tracking-wider text-slate-400 dark:text-slate-500 mb-4">Color Theme</h3>
+                                            <div className="grid grid-cols-2 gap-3">
+                                                {Object.entries(THEMES).map(([key, t]) => (
+                                                    <button key={key} onClick={() => setTheme(key)}
+                                                        className={`flex items-center gap-3 px-3 py-3 rounded-xl border-2 transition-all ${theme === key ? 'border-brand-500 shadow-md' : 'border-slate-200 dark:border-slate-700 hover:border-brand-300'}`}>
+                                                        <div className="flex gap-1 flex-none">
+                                                            <div className="w-5 h-5 rounded-full border border-slate-300 shadow-sm" style={{ background: t.c1 }} />
+                                                            <div className="w-5 h-5 rounded-full border border-slate-300 shadow-sm" style={{ background: t.c2 }} />
+                                                        </div>
+                                                        <span className="text-xs font-medium text-slate-700 dark:text-slate-300 text-left leading-tight">{t.name}</span>
+                                                        {theme === key && <div className="ml-auto w-2 h-2 rounded-full bg-brand-500 flex-none" />}
+                                                    </button>
+                                                ))}
+                                            </div>
+                                        </div>
+                                    </div>
+                                </motion.div>
+                            </>
+                        )}
+                    </AnimatePresence>
+
+                </div>
+            );
+        }
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
+    </script>
+</body>
+
+</html>
