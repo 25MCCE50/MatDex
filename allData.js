@@ -4982,7 +4982,7 @@ const allMatDexData = [
   {
     "term": "acceptor state",
     "definition": "An energy level introduced near the valence band of a semiconductor by substituting a dopant atom with fewer valence electrons, which accepts electrons and creates mobile positive holes.",
-    "category": "Laws & Equations",
+    "category": "Phenomena",
     "sub_category": "Crystal Structure",
     "formula": "",
     "applications": [
@@ -5070,7 +5070,7 @@ const allMatDexData = [
   {
     "term": "anelastic deformation",
     "definition": "A specific type of time-dependent elastic deformation where the material completely recovers its original shape after the stress is removed, but the recovery takes a measurable amount of time.",
-    "category": "Laws & Equations",
+    "category": "Phenomena",
     "sub_category": "Crystal Structure",
     "formula": "",
     "applications": [
