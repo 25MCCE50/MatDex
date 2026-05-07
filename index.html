@@ -104,32 +104,66 @@
 
         /* ── Tile entrance animations ── */
         @keyframes tileIn {
-            from { opacity: 0; transform: translateY(18px) scale(0.96); }
-            to   { opacity: 1; transform: translateY(0)   scale(1); }
+            from {
+                opacity: 0;
+                transform: translateY(18px) scale(0.96);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
         }
+
         .tile-enter {
             animation: tileIn 0.38s cubic-bezier(0.22, 1, 0.36, 1) both;
         }
 
         /* ── Navbar tab slide-in ── */
         @keyframes slideDown {
-            from { opacity: 0; transform: translateY(-8px); }
-            to   { opacity: 1; transform: translateY(0); }
+            from {
+                opacity: 0;
+                transform: translateY(-8px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
-        .slide-down { animation: slideDown 0.25s ease both; }
+
+        .slide-down {
+            animation: slideDown 0.25s ease both;
+        }
 
         /* ── Focus mode pulse ring ── */
         @keyframes focusPulse {
-            0%, 100% { box-shadow: 0 0 0 0 rgba(var(--brand-500) / 0.4); }
-            50%       { box-shadow: 0 0 0 18px rgba(var(--brand-500) / 0); }
+
+            0%,
+            100% {
+                box-shadow: 0 0 0 0 rgba(var(--brand-500) / 0.4);
+            }
+
+            50% {
+                box-shadow: 0 0 0 18px rgba(var(--brand-500) / 0);
+            }
         }
-        .focus-pulse { animation: focusPulse 2s ease-in-out infinite; }
+
+        .focus-pulse {
+            animation: focusPulse 2s ease-in-out infinite;
+        }
 
         /* ── Logo shimmer ── */
         @keyframes shimmer {
-            0%   { background-position: -200% center; }
-            100% { background-position:  200% center; }
+            0% {
+                background-position: -200% center;
+            }
+
+            100% {
+                background-position: 200% center;
+            }
         }
+
         .logo-shimmer {
             background: linear-gradient(90deg, rgb(var(--brand-500)), rgb(var(--brand-300)), rgb(var(--brand-500)));
             background-size: 200% auto;
@@ -172,25 +206,25 @@
         const CATEGORIES = ["All", ...new Set((typeof allMatDexData !== 'undefined' ? allMatDexData : [])
             .filter(item => item.category !== 'Periodic Table')
             .map(item => item.category).filter(Boolean))].sort((a, b) => {
-            if (a === "All") return -1;
-            if (b === "All") return 1;
-            return a.localeCompare(b);
-        });
+                if (a === "All") return -1;
+                if (b === "All") return 1;
+                return a.localeCompare(b);
+            });
         const ALPHABETS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("");
 
         // ── Periodic Table Component ──────────────────────────────────────────
         const PT_COLORS = {
-            'alkali-metal':    { bg: 'bg-red-100 dark:bg-red-900/40',     text: 'text-red-800 dark:text-red-200',    border: 'border-red-300 dark:border-red-700',    label: 'Alkali Metal' },
-            'alkaline-earth':  { bg: 'bg-orange-100 dark:bg-orange-900/40', text: 'text-orange-800 dark:text-orange-200', border: 'border-orange-300 dark:border-orange-700', label: 'Alkaline Earth' },
-            'transition':      { bg: 'bg-yellow-100 dark:bg-yellow-900/40', text: 'text-yellow-800 dark:text-yellow-200', border: 'border-yellow-300 dark:border-yellow-700', label: 'Transition Metal' },
-            'post-transition': { bg: 'bg-green-100 dark:bg-green-900/40',  text: 'text-green-800 dark:text-green-200',  border: 'border-green-300 dark:border-green-700',  label: 'Post-Transition' },
-            'metalloid':       { bg: 'bg-teal-100 dark:bg-teal-900/40',    text: 'text-teal-800 dark:text-teal-200',    border: 'border-teal-300 dark:border-teal-700',    label: 'Metalloid' },
-            'nonmetal':        { bg: 'bg-blue-100 dark:bg-blue-900/40',    text: 'text-blue-800 dark:text-blue-200',    border: 'border-blue-300 dark:border-blue-700',    label: 'Nonmetal' },
-            'halogen':         { bg: 'bg-purple-100 dark:bg-purple-900/40', text: 'text-purple-800 dark:text-purple-200', border: 'border-purple-300 dark:border-purple-700', label: 'Halogen' },
-            'noble-gas':       { bg: 'bg-pink-100 dark:bg-pink-900/40',    text: 'text-pink-800 dark:text-pink-200',    border: 'border-pink-300 dark:border-pink-700',    label: 'Noble Gas' },
-            'lanthanide':      { bg: 'bg-indigo-100 dark:bg-indigo-900/40', text: 'text-indigo-800 dark:text-indigo-200', border: 'border-indigo-300 dark:border-indigo-700', label: 'Lanthanide' },
-            'actinide':        { bg: 'bg-violet-100 dark:bg-violet-900/40', text: 'text-violet-800 dark:text-violet-200', border: 'border-violet-300 dark:border-violet-700', label: 'Actinide' },
-            'unknown':         { bg: 'bg-slate-100 dark:bg-slate-700',     text: 'text-slate-600 dark:text-slate-300',  border: 'border-slate-300 dark:border-slate-600',  label: 'Unknown' },
+            'alkali-metal': { bg: 'bg-red-100 dark:bg-red-900/40', text: 'text-red-800 dark:text-red-200', border: 'border-red-300 dark:border-red-700', label: 'Alkali Metal' },
+            'alkaline-earth': { bg: 'bg-orange-100 dark:bg-orange-900/40', text: 'text-orange-800 dark:text-orange-200', border: 'border-orange-300 dark:border-orange-700', label: 'Alkaline Earth' },
+            'transition': { bg: 'bg-yellow-100 dark:bg-yellow-900/40', text: 'text-yellow-800 dark:text-yellow-200', border: 'border-yellow-300 dark:border-yellow-700', label: 'Transition Metal' },
+            'post-transition': { bg: 'bg-green-100 dark:bg-green-900/40', text: 'text-green-800 dark:text-green-200', border: 'border-green-300 dark:border-green-700', label: 'Post-Transition' },
+            'metalloid': { bg: 'bg-teal-100 dark:bg-teal-900/40', text: 'text-teal-800 dark:text-teal-200', border: 'border-teal-300 dark:border-teal-700', label: 'Metalloid' },
+            'nonmetal': { bg: 'bg-blue-100 dark:bg-blue-900/40', text: 'text-blue-800 dark:text-blue-200', border: 'border-blue-300 dark:border-blue-700', label: 'Nonmetal' },
+            'halogen': { bg: 'bg-purple-100 dark:bg-purple-900/40', text: 'text-purple-800 dark:text-purple-200', border: 'border-purple-300 dark:border-purple-700', label: 'Halogen' },
+            'noble-gas': { bg: 'bg-pink-100 dark:bg-pink-900/40', text: 'text-pink-800 dark:text-pink-200', border: 'border-pink-300 dark:border-pink-700', label: 'Noble Gas' },
+            'lanthanide': { bg: 'bg-indigo-100 dark:bg-indigo-900/40', text: 'text-indigo-800 dark:text-indigo-200', border: 'border-indigo-300 dark:border-indigo-700', label: 'Lanthanide' },
+            'actinide': { bg: 'bg-violet-100 dark:bg-violet-900/40', text: 'text-violet-800 dark:text-violet-200', border: 'border-violet-300 dark:border-violet-700', label: 'Actinide' },
+            'unknown': { bg: 'bg-slate-100 dark:bg-slate-700', text: 'text-slate-600 dark:text-slate-300', border: 'border-slate-300 dark:border-slate-600', label: 'Unknown' },
         };
 
         function PeriodicTableView({ data, onSelectElement }) {
@@ -253,7 +287,7 @@
                 <div className="overflow-auto custom-scrollbar pb-8">
                     {/* Group numbers */}
                     <div className="flex gap-0.5 mb-1 pl-5">
-                        {[1,...Array.from({length:17},(_,i)=>i+2)].map(g => (
+                        {[1, ...Array.from({ length: 17 }, (_, i) => i + 2)].map(g => (
                             <span key={g} className="w-14 text-[9px] text-slate-400 dark:text-slate-500 text-center flex-none">{g}</span>
                         ))}
                     </div>
@@ -271,7 +305,7 @@
                     </div>
                     {/* Legend */}
                     <div className="mt-4 flex flex-wrap gap-2 pl-6">
-                        {Object.entries(PT_COLORS).filter(([k])=>k!=='unknown').map(([k,v]) => (
+                        {Object.entries(PT_COLORS).filter(([k]) => k !== 'unknown').map(([k, v]) => (
                             <div key={k} className={`flex items-center gap-1 px-2 py-0.5 rounded-full border text-[10px] font-medium ${v.bg} ${v.text} ${v.border}`}>
                                 <span>{v.label}</span>
                             </div>
@@ -294,7 +328,7 @@
             const osUrl = `https://en.wikipedia.org/w/api.php?action=opensearch&search=${encodeURIComponent(clean)}&limit=5&format=json&origin=*`;
             const osData = await fetch(osUrl).then(r => r.json());
             const suggestions = osData[1] || [];
-            const urls       = osData[3] || [];
+            const urls = osData[3] || [];
             if (suggestions.length === 0) return null;
 
             // Helper: verify a title resolves to a real, non-disambiguation page
@@ -349,7 +383,7 @@
                     const isMeta = IGNORE_FILES.some(kw => lowerTitle.includes(kw));
                     if (isMeta) continue;
                     const captionText = (item.caption && item.caption.text ? item.caption.text : '').toLowerCase();
-                    const descText   = (item.caption && item.caption.html ? item.caption.html  : '').toLowerCase();
+                    const descText = (item.caption && item.caption.html ? item.caption.html : '').toLowerCase();
                     const likelyHuman = HUMAN_KEYWORDS.some(kw => captionText.includes(kw) || descText.includes(kw));
                     if (!likelyHuman) candidates.push({ item, lowerTitle });
                 }
@@ -417,9 +451,9 @@
         // Fuzzy search: Levenshtein distance
         function levenshtein(a, b) {
             const m = a.length, n = b.length;
-            const dp = Array.from({length: m+1}, (_, i) => Array.from({length: n+1}, (_, j) => i === 0 ? j : j === 0 ? i : 0));
+            const dp = Array.from({ length: m + 1 }, (_, i) => Array.from({ length: n + 1 }, (_, j) => i === 0 ? j : j === 0 ? i : 0));
             for (let i = 1; i <= m; i++) for (let j = 1; j <= n; j++)
-                dp[i][j] = a[i-1] === b[j-1] ? dp[i-1][j-1] : 1 + Math.min(dp[i-1][j], dp[i][j-1], dp[i-1][j-1]);
+                dp[i][j] = a[i - 1] === b[j - 1] ? dp[i - 1][j - 1] : 1 + Math.min(dp[i - 1][j], dp[i][j - 1], dp[i - 1][j - 1]);
             return dp[m][n];
         }
         function fuzzyMatch(term, query) {
@@ -434,36 +468,36 @@
 
         // Helper: hex to "R G B" string for CSS custom properties
         function hexToRgb(hex) {
-            const r = parseInt(hex.slice(1,3),16), g = parseInt(hex.slice(3,5),16), b = parseInt(hex.slice(5,7),16);
+            const r = parseInt(hex.slice(1, 3), 16), g = parseInt(hex.slice(3, 5), 16), b = parseInt(hex.slice(5, 7), 16);
             return `${r} ${g} ${b}`;
         }
         function lighten(hex, amt) { // amt 0-1 mixes with white
-            const r=parseInt(hex.slice(1,3),16), g=parseInt(hex.slice(3,5),16), b=parseInt(hex.slice(5,7),16);
-            return `${Math.round(r+(255-r)*amt)} ${Math.round(g+(255-g)*amt)} ${Math.round(b+(255-b)*amt)}`;
+            const r = parseInt(hex.slice(1, 3), 16), g = parseInt(hex.slice(3, 5), 16), b = parseInt(hex.slice(5, 7), 16);
+            return `${Math.round(r + (255 - r) * amt)} ${Math.round(g + (255 - g) * amt)} ${Math.round(b + (255 - b) * amt)}`;
         }
         function darken(hex, amt) { // amt 0-1 mixes with black
-            const r=parseInt(hex.slice(1,3),16), g=parseInt(hex.slice(3,5),16), b=parseInt(hex.slice(5,7),16);
-            return `${Math.round(r*(1-amt))} ${Math.round(g*(1-amt))} ${Math.round(b*(1-amt))}`;
+            const r = parseInt(hex.slice(1, 3), 16), g = parseInt(hex.slice(3, 5), 16), b = parseInt(hex.slice(5, 7), 16);
+            return `${Math.round(r * (1 - amt))} ${Math.round(g * (1 - amt))} ${Math.round(b * (1 - amt))}`;
         }
         function makePalette(hex) {
             return {
-                50:  lighten(hex, 0.92), 100: lighten(hex, 0.82), 300: lighten(hex, 0.45),
-                400: lighten(hex, 0.22), 500: hexToRgb(hex),      600: darken(hex, 0.12),
-                700: darken(hex, 0.28),  800: darken(hex, 0.44),  900: darken(hex, 0.58)
+                50: lighten(hex, 0.92), 100: lighten(hex, 0.82), 300: lighten(hex, 0.45),
+                400: lighten(hex, 0.22), 500: hexToRgb(hex), 600: darken(hex, 0.12),
+                700: darken(hex, 0.28), 800: darken(hex, 0.44), 900: darken(hex, 0.58)
             };
         }
 
         const THEMES = {
-            'light-sky':    { name: 'Sky Blue (Light)',   bg: '#f0faff', accent: '#70d6ff', c1: '#f0faff', c2: '#70d6ff', dark: false, palette: makePalette('#70d6ff') },
-            'dark-sky':     { name: 'Sky Blue (Dark)',    bg: '#071620', accent: '#70d6ff', c1: '#071620', c2: '#70d6ff', dark: true,  palette: makePalette('#70d6ff') },
-            'light-pink':   { name: 'Bubblegum (Light)',  bg: '#fff0f7', accent: '#ff70a6', c1: '#fff0f7', c2: '#ff70a6', dark: false, palette: makePalette('#ff70a6') },
-            'dark-pink':    { name: 'Bubblegum (Dark)',   bg: '#200710', accent: '#ff70a6', c1: '#200710', c2: '#ff70a6', dark: true,  palette: makePalette('#ff70a6') },
-            'light-peach':  { name: 'Peach (Light)',      bg: '#fff5f0', accent: '#ff9770', c1: '#fff5f0', c2: '#ff9770', dark: false, palette: makePalette('#ff9770') },
-            'dark-peach':   { name: 'Peach (Dark)',       bg: '#1f0a04', accent: '#ff9770', c1: '#1f0a04', c2: '#ff9770', dark: true,  palette: makePalette('#ff9770') },
-            'light-yellow': { name: 'Lemon (Light)',      bg: '#fffdf0', accent: '#ffd670', c1: '#fffdf0', c2: '#ffd670', dark: false, palette: makePalette('#ffd670') },
-            'dark-yellow':  { name: 'Lemon (Dark)',       bg: '#1a1500', accent: '#ffd670', c1: '#1a1500', c2: '#ffd670', dark: true,  palette: makePalette('#ffd670') },
-            'light-lime':   { name: 'Lime (Light)',       bg: '#f8fff0', accent: '#e9ff70', c1: '#f8fff0', c2: '#e9ff70', dark: false, palette: makePalette('#e9ff70') },
-            'dark-lime':    { name: 'Lime (Dark)',        bg: '#101a00', accent: '#e9ff70', c1: '#101a00', c2: '#e9ff70', dark: true,  palette: makePalette('#e9ff70') },
+            'light-sky': { name: 'Sky Blue (Light)', bg: '#f0faff', accent: '#70d6ff', c1: '#f0faff', c2: '#70d6ff', dark: false, palette: makePalette('#70d6ff') },
+            'dark-sky': { name: 'Sky Blue (Dark)', bg: '#071620', accent: '#70d6ff', c1: '#071620', c2: '#70d6ff', dark: true, palette: makePalette('#70d6ff') },
+            'light-pink': { name: 'Bubblegum (Light)', bg: '#fff0f7', accent: '#ff70a6', c1: '#fff0f7', c2: '#ff70a6', dark: false, palette: makePalette('#ff70a6') },
+            'dark-pink': { name: 'Bubblegum (Dark)', bg: '#200710', accent: '#ff70a6', c1: '#200710', c2: '#ff70a6', dark: true, palette: makePalette('#ff70a6') },
+            'light-peach': { name: 'Peach (Light)', bg: '#fff5f0', accent: '#ff9770', c1: '#fff5f0', c2: '#ff9770', dark: false, palette: makePalette('#ff9770') },
+            'dark-peach': { name: 'Peach (Dark)', bg: '#1f0a04', accent: '#ff9770', c1: '#1f0a04', c2: '#ff9770', dark: true, palette: makePalette('#ff9770') },
+            'light-yellow': { name: 'Lemon (Light)', bg: '#fffdf0', accent: '#ffd670', c1: '#fffdf0', c2: '#ffd670', dark: false, palette: makePalette('#ffd670') },
+            'dark-yellow': { name: 'Lemon (Dark)', bg: '#1a1500', accent: '#ffd670', c1: '#1a1500', c2: '#ffd670', dark: true, palette: makePalette('#ffd670') },
+            'light-lime': { name: 'Lime (Light)', bg: '#f8fff0', accent: '#e9ff70', c1: '#f8fff0', c2: '#e9ff70', dark: false, palette: makePalette('#e9ff70') },
+            'dark-lime': { name: 'Lime (Dark)', bg: '#101a00', accent: '#e9ff70', c1: '#101a00', c2: '#e9ff70', dark: true, palette: makePalette('#e9ff70') },
         };
 
         function App() {
@@ -635,7 +669,7 @@
                                             return updated;
                                         });
                                     }
-                                } catch(e) { /* skip partial */ }
+                                } catch (e) { /* skip partial */ }
                             }
                         }
                     }
@@ -837,7 +871,7 @@
                                     {searchInput && (
                                         <button onClick={() => { setSearchInput(''); setActiveSearch(''); setShowSuggestions(false); }}
                                             className="absolute inset-y-0 right-10 flex items-center pr-2 text-slate-400 hover:text-slate-600">
-                                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12"/></svg>
+                                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
                                         </button>
                                     )}
                                     <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
@@ -896,33 +930,31 @@
                             <div className="flex rounded-full border border-slate-200 dark:border-slate-700 bg-slate-100 dark:bg-slate-800 p-0.5 flex-none">
                                 <button onClick={() => setActiveTab('dictionary')} className={`px-4 py-1 rounded-full text-sm font-semibold transition-all ${activeTab === 'dictionary' ? 'bg-white dark:bg-slate-700 text-brand-600 dark:text-brand-400 shadow-sm' : 'text-slate-500 dark:text-slate-400 hover:text-slate-700'}`}>Dictionary</button>
                                 <button onClick={() => setActiveTab('bookmarks')} className={`flex items-center gap-1.5 px-4 py-1 rounded-full text-sm font-semibold transition-all ${activeTab === 'bookmarks' ? 'bg-white dark:bg-slate-700 text-brand-600 dark:text-brand-400 shadow-sm' : 'text-slate-500 dark:text-slate-400 hover:text-slate-700'}`}>
-                                    <svg className="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24"><path d="M5 3a2 2 0 00-2 2v16l7-3 7 3V5a2 2 0 00-2-2H5z"/></svg>
+                                    <svg className="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24"><path d="M5 3a2 2 0 00-2 2v16l7-3 7 3V5a2 2 0 00-2-2H5z" /></svg>
                                     Bookmarks {bookmarks.length > 0 && <span className="bg-brand-500 text-white text-[10px] rounded-full w-4 h-4 flex items-center justify-center">{bookmarks.length}</span>}
                                 </button>
                             </div>
                             <div className="flex overflow-x-auto hide-scrollbar gap-2">
-                                    {CATEGORIES.map(cat => (
-                                        <button key={cat} onClick={() => { setSelectedCategory(cat); if (activeTab !== 'dictionary' && activeTab !== 'bookmarks') setActiveTab('dictionary'); }}
-                                            className={`px-4 py-1.5 rounded-full text-sm font-medium whitespace-nowrap transition-colors border ${
-                                                selectedCategory === cat && activeTab === 'dictionary'
-                                                    ? 'bg-brand-500 text-white border-brand-500 shadow-md'
-                                                    : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 border-slate-200 dark:border-slate-700 hover:border-brand-300 dark:hover:border-brand-500 hover:text-brand-600 dark:hover:text-brand-400'
+                                {CATEGORIES.map(cat => (
+                                    <button key={cat} onClick={() => { setSelectedCategory(cat); if (activeTab !== 'dictionary' && activeTab !== 'bookmarks') setActiveTab('dictionary'); }}
+                                        className={`px-4 py-1.5 rounded-full text-sm font-medium whitespace-nowrap transition-colors border ${selectedCategory === cat && activeTab === 'dictionary'
+                                            ? 'bg-brand-500 text-white border-brand-500 shadow-md'
+                                            : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 border-slate-200 dark:border-slate-700 hover:border-brand-300 dark:hover:border-brand-500 hover:text-brand-600 dark:hover:text-brand-400'
                                             }`}>{cat}
-                                        </button>
-                                    ))}
-                                    {/* Periodic Table Button — always at end of categories */}
-                                    <button
-                                        onClick={() => setActiveTab('periodic-table')}
-                                        className={`flex items-center gap-2 px-4 py-1.5 rounded-full text-sm font-medium whitespace-nowrap transition-colors border ${
-                                            activeTab === 'periodic-table'
-                                                ? 'bg-brand-500 text-white border-brand-500 shadow-md'
-                                                : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 border-slate-200 dark:border-slate-700 hover:border-brand-300 dark:hover:border-brand-500 hover:text-brand-600 dark:hover:text-brand-400'
-                                        }`}
-                                    >
-                                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h18M3 14h18M10 3v18M14 3v18M3 6a3 3 0 013-3h12a3 3 0 013 3v12a3 3 0 01-3 3H6a3 3 0 01-3-3V6z" /></svg>
-                                        Periodic Table
                                     </button>
-                                </div>
+                                ))}
+                                {/* Periodic Table Button — always at end of categories */}
+                                <button
+                                    onClick={() => setActiveTab('periodic-table')}
+                                    className={`flex items-center gap-2 px-4 py-1.5 rounded-full text-sm font-medium whitespace-nowrap transition-colors border ${activeTab === 'periodic-table'
+                                        ? 'bg-brand-500 text-white border-brand-500 shadow-md'
+                                        : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 border-slate-200 dark:border-slate-700 hover:border-brand-300 dark:hover:border-brand-500 hover:text-brand-600 dark:hover:text-brand-400'
+                                        }`}
+                                >
+                                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h18M3 14h18M10 3v18M14 3v18M3 6a3 3 0 013-3h12a3 3 0 013 3v12a3 3 0 01-3 3H6a3 3 0 01-3-3V6z" /></svg>
+                                    Periodic Table
+                                </button>
+                            </div>
                         </div>
                     </nav>
 
@@ -961,7 +993,7 @@
                             ) : activeTab === 'bookmarks' ? (
                                 bookmarks.length === 0 ? (
                                     <div className="flex flex-col items-center justify-center h-64 text-slate-400 dark:text-slate-500">
-                                        <svg className="w-12 h-12 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M5 3a2 2 0 00-2 2v16l7-3 7 3V5a2 2 0 00-2-2H5z"/></svg>
+                                        <svg className="w-12 h-12 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M5 3a2 2 0 00-2 2v16l7-3 7 3V5a2 2 0 00-2-2H5z" /></svg>
                                         <p className="text-lg font-medium">No bookmarks yet.</p>
                                         <p className="text-sm mt-1">Click the bookmark icon on any term to save it here.</p>
                                     </div>
@@ -975,7 +1007,7 @@
                                                 <div className="flex items-start justify-between mb-4">
                                                     <h3 className="text-xl font-bold text-slate-800 dark:text-slate-100 capitalize group-hover:text-brand-600 transition-colors">{item.term}</h3>
                                                     <button onClick={(e) => { e.stopPropagation(); toggleBookmark(item); }} className="p-1.5 text-brand-500 hover:text-brand-700 transition-colors" title="Remove bookmark">
-                                                        <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M5 3a2 2 0 00-2 2v16l7-3 7 3V5a2 2 0 00-2-2H5z"/></svg>
+                                                        <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M5 3a2 2 0 00-2 2v16l7-3 7 3V5a2 2 0 00-2-2H5z" /></svg>
                                                     </button>
                                                 </div>
                                                 <p className="text-sm text-slate-500 dark:text-slate-400 line-clamp-3 leading-relaxed flex-1">{item.definition}</p>
@@ -1024,7 +1056,7 @@
                                                                     className={`p-1.5 rounded-md transition-colors ${isBookmarked ? 'text-brand-500' : 'text-slate-300 dark:text-slate-600 hover:text-brand-400'}`}
                                                                     title={isBookmarked ? 'Remove bookmark' : 'Bookmark this term'}
                                                                 >
-                                                                    <svg className="w-4 h-4" fill={isBookmarked ? 'currentColor' : 'none'} stroke="currentColor" strokeWidth={isBookmarked ? 0 : 2} viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M5 3a2 2 0 00-2 2v16l7-3 7 3V5a2 2 0 00-2-2H5z"/></svg>
+                                                                    <svg className="w-4 h-4" fill={isBookmarked ? 'currentColor' : 'none'} stroke="currentColor" strokeWidth={isBookmarked ? 0 : 2} viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M5 3a2 2 0 00-2 2v16l7-3 7 3V5a2 2 0 00-2-2H5z" /></svg>
                                                                 </button>
                                                                 <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-1 bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-400 rounded-md">{item.category}</span>
                                                             </div>
@@ -1221,23 +1253,23 @@
                                                         {displayTerm.related_terms
                                                             .filter(rel => data.some(t => t.term.toLowerCase() === rel.toLowerCase()))
                                                             .map((rel, idx) => (
-                                                            <span
-                                                                key={idx}
-                                                                onClick={() => {
-                                                                    const targetTerm = data.find(t => t.term.toLowerCase() === rel.toLowerCase());
-                                                                    if (targetTerm) {
-                                                                        setSelectedCategory('All');
-                                                                        setSelectedAlphabet(null);
-                                                                        setActiveSearch('');
-                                                                        setSearchInput('');
-                                                                        setSelectedTerm(targetTerm);
-                                                                    }
-                                                                }}
-                                                                className="px-4 py-2 bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-300 rounded-xl text-sm font-semibold cursor-pointer hover:bg-slate-200 dark:hover:bg-slate-600 transition-colors border border-transparent hover:border-slate-300 dark:hover:border-slate-500"
-                                                            >
-                                                                {rel}
-                                                            </span>
-                                                        ))}
+                                                                <span
+                                                                    key={idx}
+                                                                    onClick={() => {
+                                                                        const targetTerm = data.find(t => t.term.toLowerCase() === rel.toLowerCase());
+                                                                        if (targetTerm) {
+                                                                            setSelectedCategory('All');
+                                                                            setSelectedAlphabet(null);
+                                                                            setActiveSearch('');
+                                                                            setSearchInput('');
+                                                                            setSelectedTerm(targetTerm);
+                                                                        }
+                                                                    }}
+                                                                    className="px-4 py-2 bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-300 rounded-xl text-sm font-semibold cursor-pointer hover:bg-slate-200 dark:hover:bg-slate-600 transition-colors border border-transparent hover:border-slate-300 dark:hover:border-slate-500"
+                                                                >
+                                                                    {rel}
+                                                                </span>
+                                                            ))}
                                                     </div>
                                                 </motion.div>
                                             )}
@@ -1309,7 +1341,7 @@
                                         </div>
                                         <div>
                                             <h3 className="font-bold text-slate-800 dark:text-white leading-tight">MatDex AI Assistant</h3>
-                                <p className="text-xs text-slate-500 dark:text-slate-400">Powered by Llama 3.1 70B · Streaming</p>
+                                            <p className="text-xs text-slate-500 dark:text-slate-400">Powered by Llama 3.1 70B · Streaming</p>
                                         </div>
                                     </div>
                                     <button onClick={() => setIsChatOpen(false)} className="p-2 text-slate-500 hover:text-slate-800 dark:hover:text-white bg-slate-100 hover:bg-slate-200 dark:bg-slate-700 dark:hover:bg-slate-600 rounded-full transition-colors">
@@ -1334,15 +1366,14 @@
                                                     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" /></svg>
                                                 </div>
                                             )}
-                                            <div className={`max-w-[80%] rounded-2xl p-4 ${
-                                                msg.role === 'user'
+                                            <div className={`max-w-[80%] rounded-2xl p-4 ${msg.role === 'user'
                                                 ? 'bg-brand-500 text-white rounded-br-none'
                                                 : msg.error
                                                     ? 'bg-red-50 text-red-600 border border-red-200 dark:bg-red-900/30 dark:text-red-400 dark:border-red-800 rounded-bl-none'
                                                     : msg.stopped
                                                         ? 'bg-amber-50 dark:bg-amber-900/20 text-slate-700 dark:text-slate-300 border border-amber-200 dark:border-amber-800 rounded-bl-none shadow-sm'
                                                         : 'bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-200 border border-slate-200 dark:border-slate-700 rounded-bl-none shadow-sm'
-                                            }`}>
+                                                }`}>
                                                 {msg.role === 'assistant' && !msg.content && msg.streaming ? (
                                                     <div className="flex gap-1.5 items-center h-4 py-2">
                                                         <div className="w-1.5 h-1.5 bg-brand-400 rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></div>
@@ -1529,7 +1560,7 @@
                                             <p className="text-xs font-semibold uppercase tracking-wider text-slate-400 dark:text-slate-500 mb-2 text-center">Set Duration (minutes)</p>
                                             <div className="flex gap-2 justify-center flex-wrap">
                                                 {[5, 10, 15, 25, 30, 45, 60].map(m => (
-                                                    <button key={m} onClick={() => { setFocusMinutes(m); setFocusSecondsLeft(m * 60); setFocusRunning(false); if(focusIntervalRef.current){clearInterval(focusIntervalRef.current);focusIntervalRef.current=null;} }}
+                                                    <button key={m} onClick={() => { setFocusMinutes(m); setFocusSecondsLeft(m * 60); setFocusRunning(false); if (focusIntervalRef.current) { clearInterval(focusIntervalRef.current); focusIntervalRef.current = null; } }}
                                                         className={`px-3 py-1.5 rounded-full text-sm font-semibold border-2 transition-all ${focusMinutes === m && !focusRunning ? 'border-brand-500 bg-brand-50 dark:bg-brand-900/20 text-brand-700 dark:text-brand-300' : 'border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-400 hover:border-brand-300'}`}
                                                     >{m}</button>
                                                 ))}
@@ -1541,17 +1572,17 @@
                                             {!focusRunning ? (
                                                 <button onClick={focusStart} disabled={focusSecondsLeft === 0}
                                                     className="flex items-center gap-2 px-5 py-2.5 bg-brand-500 hover:bg-brand-600 disabled:opacity-40 text-white rounded-full font-semibold shadow-md transition-all">
-                                                    <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg> Start
+                                                    <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z" /></svg> Start
                                                 </button>
                                             ) : (
                                                 <button onClick={focusPause}
                                                     className="flex items-center gap-2 px-5 py-2.5 bg-amber-500 hover:bg-amber-600 text-white rounded-full font-semibold shadow-md transition-all">
-                                                    <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg> Pause
+                                                    <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z" /></svg> Pause
                                                 </button>
                                             )}
                                             <button onClick={focusStop}
                                                 className="flex items-center gap-2 px-5 py-2.5 bg-red-500 hover:bg-red-600 text-white rounded-full font-semibold shadow-md transition-all">
-                                                <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M6 6h12v12H6z"/></svg> Stop
+                                                <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M6 6h12v12H6z" /></svg> Stop
                                             </button>
                                             <button onClick={focusAddFive}
                                                 className="flex items-center gap-2 px-5 py-2.5 bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-300 rounded-full font-semibold transition-all border border-slate-200 dark:border-slate-600">
