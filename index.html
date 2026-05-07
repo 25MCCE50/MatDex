@@ -101,6 +101,43 @@
         .dark .custom-scrollbar::-webkit-scrollbar-thumb {
             background-color: #475569;
         }
+
+        /* ── Tile entrance animations ── */
+        @keyframes tileIn {
+            from { opacity: 0; transform: translateY(18px) scale(0.96); }
+            to   { opacity: 1; transform: translateY(0)   scale(1); }
+        }
+        .tile-enter {
+            animation: tileIn 0.38s cubic-bezier(0.22, 1, 0.36, 1) both;
+        }
+
+        /* ── Navbar tab slide-in ── */
+        @keyframes slideDown {
+            from { opacity: 0; transform: translateY(-8px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+        .slide-down { animation: slideDown 0.25s ease both; }
+
+        /* ── Focus mode pulse ring ── */
+        @keyframes focusPulse {
+            0%, 100% { box-shadow: 0 0 0 0 rgba(var(--brand-500) / 0.4); }
+            50%       { box-shadow: 0 0 0 18px rgba(var(--brand-500) / 0); }
+        }
+        .focus-pulse { animation: focusPulse 2s ease-in-out infinite; }
+
+        /* ── Logo shimmer ── */
+        @keyframes shimmer {
+            0%   { background-position: -200% center; }
+            100% { background-position:  200% center; }
+        }
+        .logo-shimmer {
+            background: linear-gradient(90deg, rgb(var(--brand-500)), rgb(var(--brand-300)), rgb(var(--brand-500)));
+            background-size: 200% auto;
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            animation: shimmer 3s linear infinite;
+        }
     </style>
 </head>
 
@@ -119,82 +156,260 @@
         const CloseIcon = () => <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>;
         const SettingsIcon = () => <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" /><circle cx="12" cy="12" r="3" /></svg>;
 
-        const CATEGORIES = ["All", "Materials", "Properties", "Processes", "Laws", "Formulas", "Miscellaneous"];
+        // Render markdown bold (**text**) in AI responses
+        function renderMarkdown(text) {
+            if (!text) return null;
+            const parts = text.split(/(\*\*[^*]+\*\*)/g);
+            return parts.map((part, i) => {
+                if (part.startsWith('**') && part.endsWith('**')) {
+                    return <strong key={i} className="font-bold text-slate-900 dark:text-white">{part.slice(2, -2)}</strong>;
+                }
+                return <span key={i}>{part}</span>;
+            });
+        }
+
+        // Categories will be derived dynamically from the data (exclude Periodic Table from normal bar)
+        const CATEGORIES = ["All", ...new Set((typeof allMatDexData !== 'undefined' ? allMatDexData : [])
+            .filter(item => item.category !== 'Periodic Table')
+            .map(item => item.category).filter(Boolean))].sort((a, b) => {
+            if (a === "All") return -1;
+            if (b === "All") return 1;
+            return a.localeCompare(b);
+        });
         const ALPHABETS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("");
 
-        const MANUAL_CATEGORIES = {
-            "Laws": ["ohm's law", "fick's law", "fick's first law", "fick's second law", "bragg's law"],
-            "Formulas": ["arrhenius equation", "hall-petch equation"],
-            "Processes": ["annealing", "casting", "cold working", "diffusion", "extrusion", "forging", "heat treatment", "hot isostatic pressing", "hot working", "natural aging", "normalizing", "nucleation", "oxidation", "phase transformation", "precipitation hardening", "processing", "quenching", "recrystallization", "reduction", "rolling", "sintering", "solution treatment", "tempering", "work hardening", "zone refining", "atomization", "slip"],
-            "Properties": ["absorption", "allotropy", "anelastic deformation", "anisotropic", "brittle fracture", "creep", "elastic deformation", "fatigue", "hardness", "impact energy", "isotropic", "modulus of elasticity", "paramagnetism", "passivity", "permeability", "permittivity", "photoconductivity", "poisson's ratio", "polarization", "polymorphism", "property", "resistivity", "shear stress", "specific heat", "strain hardening", "stress", "tensile strength", "thermal conductivity", "thermal expansion", "toughness", "viscosity", "wear", "yield strength", "young's modulus", "rupture"],
-            "Materials": ["abrasive", "adhesive", "alloy", "austenite", "bainite", "ceramic", "composite", "composite material", "ferrous metal", "homopolymer", "insulator", "martensite", "nanocarbon", "nanocomposite", "network polymer", "nonferrous alloy", "n-type semiconductor", "particle-reinforced composite", "pearlite", "polymer", "polymer-matrix composite", "precipitate", "p-type semiconductor", "refractory", "reinforced concrete", "sacrificial anode", "semiconductor", "steel", "superalloy", "thermoplastic", "thermoset", "biomaterial", "plasticizer"]
+        // ── Periodic Table Component ──────────────────────────────────────────
+        const PT_COLORS = {
+            'alkali-metal':    { bg: 'bg-red-100 dark:bg-red-900/40',     text: 'text-red-800 dark:text-red-200',    border: 'border-red-300 dark:border-red-700',    label: 'Alkali Metal' },
+            'alkaline-earth':  { bg: 'bg-orange-100 dark:bg-orange-900/40', text: 'text-orange-800 dark:text-orange-200', border: 'border-orange-300 dark:border-orange-700', label: 'Alkaline Earth' },
+            'transition':      { bg: 'bg-yellow-100 dark:bg-yellow-900/40', text: 'text-yellow-800 dark:text-yellow-200', border: 'border-yellow-300 dark:border-yellow-700', label: 'Transition Metal' },
+            'post-transition': { bg: 'bg-green-100 dark:bg-green-900/40',  text: 'text-green-800 dark:text-green-200',  border: 'border-green-300 dark:border-green-700',  label: 'Post-Transition' },
+            'metalloid':       { bg: 'bg-teal-100 dark:bg-teal-900/40',    text: 'text-teal-800 dark:text-teal-200',    border: 'border-teal-300 dark:border-teal-700',    label: 'Metalloid' },
+            'nonmetal':        { bg: 'bg-blue-100 dark:bg-blue-900/40',    text: 'text-blue-800 dark:text-blue-200',    border: 'border-blue-300 dark:border-blue-700',    label: 'Nonmetal' },
+            'halogen':         { bg: 'bg-purple-100 dark:bg-purple-900/40', text: 'text-purple-800 dark:text-purple-200', border: 'border-purple-300 dark:border-purple-700', label: 'Halogen' },
+            'noble-gas':       { bg: 'bg-pink-100 dark:bg-pink-900/40',    text: 'text-pink-800 dark:text-pink-200',    border: 'border-pink-300 dark:border-pink-700',    label: 'Noble Gas' },
+            'lanthanide':      { bg: 'bg-indigo-100 dark:bg-indigo-900/40', text: 'text-indigo-800 dark:text-indigo-200', border: 'border-indigo-300 dark:border-indigo-700', label: 'Lanthanide' },
+            'actinide':        { bg: 'bg-violet-100 dark:bg-violet-900/40', text: 'text-violet-800 dark:text-violet-200', border: 'border-violet-300 dark:border-violet-700', label: 'Actinide' },
+            'unknown':         { bg: 'bg-slate-100 dark:bg-slate-700',     text: 'text-slate-600 dark:text-slate-300',  border: 'border-slate-300 dark:border-slate-600',  label: 'Unknown' },
         };
 
-        function getCategoryForTerm(term) {
-            const t = term.toLowerCase();
-            for (const [category, terms] of Object.entries(MANUAL_CATEGORIES)) {
-                if (terms.includes(t)) return category;
+        function PeriodicTableView({ data, onSelectElement }) {
+            // Build a grid: rows 1-7 (main table) + rows 8-9 (lanthanide/actinide)
+            // period × group → element
+            const elementsByPG = {};
+            const elements = data.filter(d => d.category === 'Periodic Table' && d.period && d.group);
+            elements.forEach(el => {
+                elementsByPG[`${el.period}-${el.group}`] = el;
+            });
+
+            const Cell = ({ period, group }) => {
+                const el = elementsByPG[`${period}-${group}`];
+                if (!el) {
+                    // Lanthanide/Actinide placeholder in main table
+                    if ((period === 6 && group === 3 && !elementsByPG['6-3']) ||
+                        (period === 7 && group === 3 && !elementsByPG['7-3'])) {
+                        return <div className="w-14 h-14 flex items-center justify-center text-[9px] text-slate-400 italic">57-71</div>;
+                    }
+                    return <div className="w-14 h-14" />;
+                }
+                const colors = PT_COLORS[el.element_type] || PT_COLORS['unknown'];
+                return (
+                    <motion.button
+                        onClick={() => onSelectElement(el)}
+                        whileHover={{ scale: 1.15, zIndex: 10 }}
+                        whileTap={{ scale: 0.95 }}
+                        className={`w-14 h-14 rounded-md border ${colors.bg} ${colors.border} ${colors.text} flex flex-col items-center justify-center cursor-pointer transition-shadow hover:shadow-lg relative`}
+                        title={el.term}
+                    >
+                        <span className="text-[8px] font-semibold opacity-70 leading-none">{el.atomic_number}</span>
+                        <span className="text-[13px] font-bold leading-none">{el.symbol}</span>
+                    </motion.button>
+                );
+            };
+
+            const rows = [];
+            // Main table rows 1-7
+            for (let p = 1; p <= 7; p++) {
+                const cells = [];
+                for (let g = 1; g <= 18; g++) {
+                    // Skip lanthanide/actinide placeholder columns (period 6&7, group 3 occupied by Lu/Lr)
+                    cells.push(<Cell key={g} period={p} group={g} />);
+                }
+                rows.push(
+                    <div key={p} className="flex gap-0.5 items-center">
+                        <span className="w-4 text-[9px] text-slate-400 dark:text-slate-500 text-right mr-1 flex-none">{p}</span>
+                        {cells}
+                    </div>
+                );
             }
-            if (t.includes('law')) return 'Laws';
-            if (t.includes('equation') || t.includes('formula')) return 'Formulas';
-            return 'Miscellaneous'; // Default
+            // Lanthanide row (period 8): start g=1 so Uue(g1) and Ubn(g2) are visible
+            const lantRow = [];
+            for (let g = 1; g <= 17; g++) lantRow.push(<Cell key={g} period={8} group={g} />);
+            // Actinide row (period 9): start g=1 for alignment (g1-2 will be empty cells)
+            const actRow = [];
+            for (let g = 1; g <= 17; g++) actRow.push(<Cell key={g} period={9} group={g} />);
+
+            return (
+                <div className="overflow-auto custom-scrollbar pb-8">
+                    {/* Group numbers */}
+                    <div className="flex gap-0.5 mb-1 pl-5">
+                        {[1,...Array.from({length:17},(_,i)=>i+2)].map(g => (
+                            <span key={g} className="w-14 text-[9px] text-slate-400 dark:text-slate-500 text-center flex-none">{g}</span>
+                        ))}
+                    </div>
+                    <div className="flex flex-col gap-0.5">{rows}</div>
+                    {/* Lanthanide / Actinide rows */}
+                    <div className="mt-3 flex flex-col gap-0.5">
+                        <div className="flex gap-0.5 items-center">
+                            <span className="text-[8px] text-indigo-500 font-bold mr-1 w-4 text-right flex-none">Ln</span>
+                            {lantRow}
+                        </div>
+                        <div className="flex gap-0.5 items-center">
+                            <span className="text-[8px] text-violet-500 font-bold mr-1 w-4 text-right flex-none">Ac</span>
+                            {actRow}
+                        </div>
+                    </div>
+                    {/* Legend */}
+                    <div className="mt-4 flex flex-wrap gap-2 pl-6">
+                        {Object.entries(PT_COLORS).filter(([k])=>k!=='unknown').map(([k,v]) => (
+                            <div key={k} className={`flex items-center gap-1 px-2 py-0.5 rounded-full border text-[10px] font-medium ${v.bg} ${v.text} ${v.border}`}>
+                                <span>{v.label}</span>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            );
+        }
+
+
+        // ── Wikipedia helpers ──────────────────────────────────────────────────
+
+        // Resolve the true Wikipedia article title for a search term.
+        // Strategy: opensearch → if title ≠ search term try a direct "page info"
+        // to follow redirects → if still nothing, try the second suggestion.
+        async function resolveWikiTitle(rawTerm) {
+            const clean = rawTerm.split(' (')[0].split(' - ')[0].trim();
+
+            // 1) Opensearch: get up to 5 suggestions
+            const osUrl = `https://en.wikipedia.org/w/api.php?action=opensearch&search=${encodeURIComponent(clean)}&limit=5&format=json&origin=*`;
+            const osData = await fetch(osUrl).then(r => r.json());
+            const suggestions = osData[1] || [];
+            const urls       = osData[3] || [];
+            if (suggestions.length === 0) return null;
+
+            // Helper: verify a title resolves to a real, non-disambiguation page
+            // and return its canonical (redirected) title + URL
+            async function verifyTitle(title, fallbackUrl) {
+                try {
+                    const infoUrl = `https://en.wikipedia.org/w/api.php?action=query&titles=${encodeURIComponent(title)}&redirects=1&prop=info|pageprops&inprop=url&format=json&origin=*`;
+                    const info = await fetch(infoUrl).then(r => r.json());
+                    const pages = Object.values(info.query.pages);
+                    const page = pages[0];
+                    if (!page || page.missing !== undefined) return null;
+                    // Skip disambiguation pages
+                    if (page.pageprops && page.pageprops.disambiguation !== undefined) return null;
+                    // Use the canonical full URL if provided, else build it
+                    const canonUrl = page.fullurl || fallbackUrl || `https://en.wikipedia.org/wiki/${encodeURIComponent(page.title.replace(/ /g, '_'))}`;
+                    return { title: page.title, url: canonUrl };
+                } catch { return null; }
+            }
+
+            // Try first suggestion
+            let resolved = await verifyTitle(suggestions[0], urls[0]);
+            if (!resolved && suggestions.length > 1) {
+                // Try remaining suggestions
+                for (let i = 1; i < suggestions.length; i++) {
+                    resolved = await verifyTitle(suggestions[i], urls[i]);
+                    if (resolved) break;
+                }
+            }
+            return resolved; // { title, url } or null
+        }
+
+        // Fetch the best diagram image from a resolved Wikipedia title.
+        // Priority: first non-human PNG/SVG candidate (not meta-icon).
+        async function fetchWikiImage(title) {
+            const HUMAN_KEYWORDS = [
+                'person', 'people', 'portrait', 'biography', 'politician', 'scientist',
+                'author', 'actor', 'actress', 'musician', 'athlete', 'born ', 'died ',
+                'american', 'british', 'french', 'german', 'professor', 'doctor', 'philosopher'
+            ];
+            const IGNORE_FILES = ['ambox', 'wikidata', 'commons-logo', 'folder', 'icon', 'stub', 'flag', 'edit-clear'];
+
+            try {
+                const mediaUrl = `https://en.wikipedia.org/api/rest_v1/page/media-list/${encodeURIComponent(title)}`;
+                const md = await fetch(mediaUrl).then(r => r.json());
+                if (!md || !md.items) return null;
+
+                // Collect usable candidates (image type, not meta-icons, not people)
+                const candidates = [];
+                for (const item of md.items) {
+                    if (item.type !== 'image') continue;
+                    const lowerTitle = (item.title || '').toLowerCase();
+                    const isMeta = IGNORE_FILES.some(kw => lowerTitle.includes(kw));
+                    if (isMeta) continue;
+                    const captionText = (item.caption && item.caption.text ? item.caption.text : '').toLowerCase();
+                    const descText   = (item.caption && item.caption.html ? item.caption.html  : '').toLowerCase();
+                    const likelyHuman = HUMAN_KEYWORDS.some(kw => captionText.includes(kw) || descText.includes(kw));
+                    if (!likelyHuman) candidates.push({ item, lowerTitle });
+                }
+
+                if (candidates.length === 0) return null;
+
+                // Pick the first candidate (could be SVG or raster)
+                const pick = candidates[0];
+                const fileTitle = pick.item.title;
+
+                // If it's an SVG, fetch its direct Wikimedia URL
+                if (pick.lowerTitle.endsWith('.svg')) {
+                    try {
+                        const commonsApi = `https://en.wikipedia.org/w/api.php?action=query&titles=${encodeURIComponent(fileTitle)}&prop=imageinfo&iiprop=url&format=json&origin=*`;
+                        const ci = await fetch(commonsApi).then(r => r.json());
+                        const pages = Object.values(ci.query.pages);
+                        const svgUrl = pages[0]?.imageinfo?.[0]?.url;
+                        if (svgUrl) return svgUrl;
+                    } catch { /* fall through */ }
+                }
+
+                // For raster (PNG/JPG/etc), use srcset highest resolution or thumbnail
+                const srcset = pick.item.srcset || [];
+                if (srcset.length > 0) return srcset[srcset.length - 1].src;
+                return pick.item.thumbnail?.source || null;
+            } catch { return null; }
         }
 
         function WikipediaImage({ term, onUrlFound }) {
             const [imgSrc, setImgSrc] = React.useState(null);
 
             React.useEffect(() => {
+                let cancelled = false;
                 setImgSrc(null);
-                const cleanTerm = term.split(' (')[0].split(' - ')[0];
 
-                fetch(`https://en.wikipedia.org/w/api.php?action=opensearch&search=${encodeURIComponent(cleanTerm)}&limit=1&format=json&origin=*`)
-                    .then(r => r.json())
-                    .then(d => {
-                        if (d[3] && d[3].length > 0) {
-                            const url = d[3][0];
-                            const title = d[1][0];
-                            if (onUrlFound) onUrlFound(url);
-                            
-                            fetch(`https://en.wikipedia.org/api/rest_v1/page/media-list/${encodeURIComponent(title)}`)
-                                .then(r => r.json())
-                                .then(md => {
-                                    if (md && md.items) {
-                                        const HUMAN_KEYWORDS = ['person', 'people', 'portrait', 'biography', 'politician', 'scientist', 'author', 'actor', 'actress', 'musician', 'athlete', 'born', 'died', 'american', 'british', 'french', 'german', 'professor', 'doctor', 'philosopher'];
-                                        const IGNORE_FILES = ['ambox', 'wikidata', 'commons-logo', 'folder', 'symbol', 'icon', 'stub', 'flag'];
-                                        
-                                        for (const item of md.items) {
-                                            if (item.type !== 'image') continue;
-                                            
-                                            const lowerTitle = (item.title || '').toLowerCase();
-                                            const isIcon = IGNORE_FILES.some(kw => lowerTitle.includes(kw)) || lowerTitle.endsWith('.svg');
-                                            if (isIcon) continue;
+                (async () => {
+                    // Step 1: resolve a valid Wikipedia page
+                    const resolved = await resolveWikiTitle(term);
+                    if (cancelled) return;
 
-                                            const captionHtml = item.caption && item.caption.text ? item.caption.text.toLowerCase() : '';
-                                            const likelyHuman = HUMAN_KEYWORDS.some(kw => captionHtml.includes(kw));
-                                            
-                                            if (!likelyHuman) {
-                                                if (item.srcset && item.srcset.length > 0) {
-                                                    setImgSrc(item.srcset[item.srcset.length - 1].src);
-                                                    break;
-                                                }
-                                            }
-                                        }
-                                    }
-                                });
-                        } else {
-                            if (onUrlFound) onUrlFound(null);
-                        }
-                    })
-                    .catch(() => {
+                    if (!resolved) {
                         if (onUrlFound) onUrlFound(null);
-                    });
-            }, [term, onUrlFound]);
+                        return;
+                    }
+                    // Step 2: report the valid URL to the parent
+                    if (onUrlFound) onUrlFound(resolved.url);
+
+                    // Step 3: fetch the best diagram image
+                    const src = await fetchWikiImage(resolved.title);
+                    if (!cancelled && src) setImgSrc(src);
+                })();
+
+                return () => { cancelled = true; };
+            }, [term]);
 
             if (!imgSrc) return null;
             return (
-                <div className="relative mt-6 rounded-xl overflow-hidden border border-slate-200 dark:border-slate-700 shadow-md flex items-center justify-center bg-slate-100 dark:bg-slate-900" style={{ maxHeight: '280px' }}>
-                    <img src={imgSrc} alt={term} className="h-full max-h-64 w-auto object-contain" style={{ display: 'block', margin: '0 auto' }} />
-                    <div className="absolute bottom-0 right-0 text-[10px] text-slate-400 dark:text-slate-500 px-2 py-0.5 bg-white/70 dark:bg-slate-900/70 rounded-tl">Image via Wikipedia</div>
+                <div className="relative mt-6 rounded-xl overflow-hidden border border-slate-200 dark:border-slate-700 shadow-md flex items-center justify-center bg-slate-100 dark:bg-slate-900" style={{ maxHeight: '320px' }}>
+                    <img src={imgSrc} alt={term} className="h-full max-h-72 w-auto object-contain" style={{ display: 'block', margin: '0 auto' }} />
+                    <div className="absolute bottom-0 right-0 text-[10px] text-slate-400 dark:text-slate-500 px-2 py-0.5 bg-white/70 dark:bg-slate-900/70 rounded-tl">Diagram via Wikipedia</div>
                 </div>
             );
         }
@@ -217,28 +432,38 @@
             return false;
         }
 
-        const PALETTES = {
-            blue: {
-                50: '238 242 255', 100: '224 231 255', 300: '165 180 252', 400: '129 140 248',
-                500: '99 102 241', 600: '79 70 229', 700: '67 56 202', 800: '55 48 163', 900: '49 46 129'
-            },
-            green: {
-                50: '240 253 244', 100: '220 252 231', 300: '134 239 172', 400: '74 222 128',
-                500: '34 197 94', 600: '22 163 74', 700: '21 128 61', 800: '22 101 52', 900: '20 83 45'
-            },
-            yellow: {
-                50: '254 252 232', 100: '254 249 195', 300: '253 224 71', 400: '250 204 21',
-                500: '234 179 8', 600: '202 138 4', 700: '161 98 7', 800: '133 77 14', 900: '113 63 18'
-            }
-        };
+        // Helper: hex to "R G B" string for CSS custom properties
+        function hexToRgb(hex) {
+            const r = parseInt(hex.slice(1,3),16), g = parseInt(hex.slice(3,5),16), b = parseInt(hex.slice(5,7),16);
+            return `${r} ${g} ${b}`;
+        }
+        function lighten(hex, amt) { // amt 0-1 mixes with white
+            const r=parseInt(hex.slice(1,3),16), g=parseInt(hex.slice(3,5),16), b=parseInt(hex.slice(5,7),16);
+            return `${Math.round(r+(255-r)*amt)} ${Math.round(g+(255-g)*amt)} ${Math.round(b+(255-b)*amt)}`;
+        }
+        function darken(hex, amt) { // amt 0-1 mixes with black
+            const r=parseInt(hex.slice(1,3),16), g=parseInt(hex.slice(3,5),16), b=parseInt(hex.slice(5,7),16);
+            return `${Math.round(r*(1-amt))} ${Math.round(g*(1-amt))} ${Math.round(b*(1-amt))}`;
+        }
+        function makePalette(hex) {
+            return {
+                50:  lighten(hex, 0.92), 100: lighten(hex, 0.82), 300: lighten(hex, 0.45),
+                400: lighten(hex, 0.22), 500: hexToRgb(hex),      600: darken(hex, 0.12),
+                700: darken(hex, 0.28),  800: darken(hex, 0.44),  900: darken(hex, 0.58)
+            };
+        }
 
         const THEMES = {
-            'white-blue':   { name: 'Light Blue',    bg: '#f8fafc', accent: '#6366f1', c1: '#f8fafc', c2: '#6366f1', dark: false, palette: PALETTES.blue },
-            'black-blue':   { name: 'Dark Blue',     bg: '#0f172a', accent: '#6366f1', c1: '#0f172a', c2: '#6366f1', dark: true,  palette: PALETTES.blue },
-            'light-green':  { name: 'Light Green',   bg: '#f0fdf4', accent: '#22c55e', c1: '#f0fdf4', c2: '#22c55e', dark: false, palette: PALETTES.green },
-            'dark-green':   { name: 'Dark Green',    bg: '#052e16', accent: '#4ade80', c1: '#052e16', c2: '#4ade80', dark: true,  palette: PALETTES.green },
-            'light-yellow': { name: 'Pastel Yellow', bg: '#fefce8', accent: '#eab308', c1: '#fefce8', c2: '#eab308', dark: false, palette: PALETTES.yellow },
-            'dark-yellow':  { name: 'Dark Yellow',   bg: '#1c1400', accent: '#facc15', c1: '#1c1400', c2: '#facc15', dark: true,  palette: PALETTES.yellow },
+            'light-sky':    { name: 'Sky Blue (Light)',   bg: '#f0faff', accent: '#70d6ff', c1: '#f0faff', c2: '#70d6ff', dark: false, palette: makePalette('#70d6ff') },
+            'dark-sky':     { name: 'Sky Blue (Dark)',    bg: '#071620', accent: '#70d6ff', c1: '#071620', c2: '#70d6ff', dark: true,  palette: makePalette('#70d6ff') },
+            'light-pink':   { name: 'Bubblegum (Light)',  bg: '#fff0f7', accent: '#ff70a6', c1: '#fff0f7', c2: '#ff70a6', dark: false, palette: makePalette('#ff70a6') },
+            'dark-pink':    { name: 'Bubblegum (Dark)',   bg: '#200710', accent: '#ff70a6', c1: '#200710', c2: '#ff70a6', dark: true,  palette: makePalette('#ff70a6') },
+            'light-peach':  { name: 'Peach (Light)',      bg: '#fff5f0', accent: '#ff9770', c1: '#fff5f0', c2: '#ff9770', dark: false, palette: makePalette('#ff9770') },
+            'dark-peach':   { name: 'Peach (Dark)',       bg: '#1f0a04', accent: '#ff9770', c1: '#1f0a04', c2: '#ff9770', dark: true,  palette: makePalette('#ff9770') },
+            'light-yellow': { name: 'Lemon (Light)',      bg: '#fffdf0', accent: '#ffd670', c1: '#fffdf0', c2: '#ffd670', dark: false, palette: makePalette('#ffd670') },
+            'dark-yellow':  { name: 'Lemon (Dark)',       bg: '#1a1500', accent: '#ffd670', c1: '#1a1500', c2: '#ffd670', dark: true,  palette: makePalette('#ffd670') },
+            'light-lime':   { name: 'Lime (Light)',       bg: '#f8fff0', accent: '#e9ff70', c1: '#f8fff0', c2: '#e9ff70', dark: false, palette: makePalette('#e9ff70') },
+            'dark-lime':    { name: 'Lime (Dark)',        bg: '#101a00', accent: '#e9ff70', c1: '#101a00', c2: '#e9ff70', dark: true,  palette: makePalette('#e9ff70') },
         };
 
         function App() {
@@ -262,6 +487,7 @@
             const [chatInput, setChatInput] = useState('');
             const [isChatLoading, setIsChatLoading] = useState(false);
             const chatEndRef = useRef(null);
+            const chatAbortRef = useRef(null);
             const [bookmarks, setBookmarks] = useState(() => {
                 try { return JSON.parse(localStorage.getItem('matdex-bookmarks') || '[]'); } catch { return []; }
             });
@@ -270,7 +496,57 @@
             // Settings
             const [isSettingsOpen, setIsSettingsOpen] = useState(false);
             const [fontSize, setFontSize] = useState(() => localStorage.getItem('matdex-fontsize') || 'medium');
-            const [theme, setTheme] = useState(() => localStorage.getItem('matdex-theme') || 'white-blue');
+            const [theme, setTheme] = useState(() => { const saved = localStorage.getItem('matdex-theme'); return (saved && THEMES[saved]) ? saved : 'light-sky'; });
+            const [animationKey, setAnimationKey] = useState(0);
+
+            // Focus Mode
+            const [isFocusOpen, setIsFocusOpen] = useState(false);
+            const [focusMinutes, setFocusMinutes] = useState(25);
+            const [focusSecondsLeft, setFocusSecondsLeft] = useState(25 * 60);
+            const [focusRunning, setFocusRunning] = useState(false);
+            const [focusQuote, setFocusQuote] = useState(0);
+            const focusIntervalRef = useRef(null);
+            const FOCUS_QUOTES = [
+                { q: "The secret of getting ahead is getting started.", a: "Mark Twain" },
+                { q: "Concentrate all your thoughts upon the work in hand.", a: "Alexander Graham Bell" },
+                { q: "It always seems impossible until it's done.", a: "Nelson Mandela" },
+                { q: "Quality is not an act, it is a habit.", a: "Aristotle" },
+                { q: "Do what you can, with what you have, where you are.", a: "Theodore Roosevelt" },
+                { q: "The expert in anything was once a beginner.", a: "Helen Hayes" },
+                { q: "Success is the sum of small efforts repeated day in and day out.", a: "Robert Collier" },
+                { q: "The more that you read, the more things you will know.", a: "Dr. Seuss" },
+            ];
+            const focusStart = () => {
+                if (focusIntervalRef.current) return;
+                setFocusRunning(true);
+                focusIntervalRef.current = setInterval(() => {
+                    setFocusSecondsLeft(s => {
+                        if (s <= 1) { clearInterval(focusIntervalRef.current); focusIntervalRef.current = null; setFocusRunning(false); return 0; }
+                        return s - 1;
+                    });
+                }, 1000);
+            };
+            const focusPause = () => {
+                clearInterval(focusIntervalRef.current); focusIntervalRef.current = null; setFocusRunning(false);
+            };
+            const focusStop = () => {
+                clearInterval(focusIntervalRef.current); focusIntervalRef.current = null;
+                setFocusRunning(false); setFocusSecondsLeft(focusMinutes * 60);
+            };
+            const focusAddFive = () => {
+                setFocusSecondsLeft(s => s + 300);
+                setFocusMinutes(m => m + 5);
+            };
+            useEffect(() => {
+                if (isFocusOpen) {
+                    setFocusQuote(Math.floor(Math.random() * FOCUS_QUOTES.length));
+                    setFocusSecondsLeft(focusMinutes * 60);
+                    setFocusRunning(false);
+                    if (focusIntervalRef.current) { clearInterval(focusIntervalRef.current); focusIntervalRef.current = null; }
+                }
+            }, [isFocusOpen]);
+            const focusMM = String(Math.floor(focusSecondsLeft / 60)).padStart(2, '0');
+            const focusSS = String(focusSecondsLeft % 60).padStart(2, '0');
 
 
             useEffect(() => {
@@ -288,11 +564,24 @@
                 });
             };
 
+            const handleStopChat = () => {
+                if (chatAbortRef.current) chatAbortRef.current.abort();
+                setChatMessages(prev => {
+                    const updated = [...prev];
+                    const last = updated[updated.length - 1];
+                    if (last && last.streaming) {
+                        updated[updated.length - 1] = { ...last, content: last.content, streaming: false, stopped: true };
+                    }
+                    return updated;
+                });
+                setIsChatLoading(false);
+            };
+
             const handleSendChatMessage = async (msg = null) => {
                 const messageToSend = typeof msg === 'string' ? msg : chatInput;
                 if (!messageToSend.trim() || isChatLoading) return;
 
-                const history = chatMessages.filter(m => !m.error);
+                const history = chatMessages.filter(m => !m.error && !m.stopped);
                 setChatMessages(prev => [...prev, { role: 'user', content: messageToSend }]);
                 setChatInput('');
                 setIsChatLoading(true);
@@ -300,11 +589,15 @@
                 // Placeholder for streaming
                 setChatMessages(prev => [...prev, { role: 'assistant', content: '', streaming: true }]);
 
+                const controller = new AbortController();
+                chatAbortRef.current = controller;
+
                 try {
-                    const response = await fetch('http://localhost:3000/api/chat', {
+                    const response = await fetch('/api/chat', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ message: messageToSend, history })
+                        body: JSON.stringify({ message: messageToSend, history }),
+                        signal: controller.signal
                     });
 
                     if (!response.ok) {
@@ -354,12 +647,14 @@
                         return updated;
                     });
                 } catch (error) {
+                    if (error.name === 'AbortError') return; // already handled by handleStopChat
                     setChatMessages(prev => {
                         const updated = [...prev];
                         updated[updated.length - 1] = { role: 'assistant', content: `Error: ${error.message}`, error: true };
                         return updated;
                     });
                 } finally {
+                    chatAbortRef.current = null;
                     setIsChatLoading(false);
                 }
             };
@@ -420,14 +715,18 @@
             }, []);
 
             // Filter data by committed search, category, alphabet
+            // When searching, only show terms whose NAME matches (not definition)
             const filteredData = useMemo(() => {
                 return data.filter(item => {
-                    const matchSearch = activeSearch ? fuzzyMatch(item.term, activeSearch) || item.definition.toLowerCase().includes(activeSearch.toLowerCase()) : true;
+                    const matchSearch = activeSearch ? fuzzyMatch(item.term, activeSearch) : true;
                     const matchCat = selectedCategory === 'All' ? true : item.category === selectedCategory;
                     const matchAlpha = selectedAlphabet ? item.term.toUpperCase().startsWith(selectedAlphabet) : true;
                     return matchSearch && matchCat && matchAlpha;
                 });
             }, [data, activeSearch, selectedCategory, selectedAlphabet]);
+
+            // Bump animationKey whenever filter results change → re-triggers tile animations
+            useEffect(() => { setAnimationKey(k => k + 1); }, [filteredData]);
 
             // Theme + font size effect
             useEffect(() => {
@@ -475,9 +774,19 @@
             // Handle Keyboard Shortcuts
             useEffect(() => {
                 const handleKeyDown = (e) => {
-                    // Escape closes the modal
+                    // Escape: if modal open close it; else reset all filters
                     if (e.key === 'Escape') {
-                        setSelectedTerm(null);
+                        if (selectedTerm) {
+                            setSelectedTerm(null);
+                        } else {
+                            // Reset everything back to "all terms"
+                            setSelectedCategory('All');
+                            setSelectedAlphabet(null);
+                            setActiveSearch('');
+                            setSearchInput('');
+                            setActiveTab('dictionary');
+                            setShowSuggestions(false);
+                        }
                     }
                     // '/' or 'Ctrl+K' / 'Cmd+K' focuses search
                     if (e.key === '/' || ((e.metaKey || e.ctrlKey) && e.key === 'k')) {
@@ -490,7 +799,7 @@
                 };
                 window.addEventListener('keydown', handleKeyDown);
                 return () => window.removeEventListener('keydown', handleKeyDown);
-            }, []);
+            }, [selectedTerm]);
 
 
 
@@ -503,7 +812,7 @@
                             {/* Logo */}
                             <div className="flex items-center gap-2 flex-none">
                                 <div className="w-8 h-8 rounded-lg bg-brand-500 flex items-center justify-center text-white font-bold text-xl">M</div>
-                                <h1 className="text-xl font-serif font-bold text-slate-800 dark:text-white tracking-tight hidden sm:block">MatDex</h1>
+                                <h1 className="text-xl font-serif font-bold tracking-tight hidden sm:block logo-shimmer">MatDex</h1>
                             </div>
 
                             {/* Centered Search */}
@@ -566,6 +875,13 @@
                                     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" /></svg>
                                     AI Assistant
                                 </button>
+                                <button onClick={() => setIsFocusOpen(true)}
+                                    className="hidden md:flex items-center gap-2 px-4 py-2 bg-brand-500 hover:bg-brand-600 text-white rounded-full font-medium shadow-md hover:shadow-lg transition-all transform hover:-translate-y-0.5 text-sm"
+                                    title="Focus Mode"
+                                >
+                                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                                    Focus Mode
+                                </button>
                                 <button onClick={() => setIsSettingsOpen(true)}
                                     className="p-2 rounded-full hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors text-slate-500 dark:text-slate-400"
                                     title="Settings"
@@ -584,19 +900,29 @@
                                     Bookmarks {bookmarks.length > 0 && <span className="bg-brand-500 text-white text-[10px] rounded-full w-4 h-4 flex items-center justify-center">{bookmarks.length}</span>}
                                 </button>
                             </div>
-                            {activeTab === 'dictionary' && (
-                                <div className="flex overflow-x-auto hide-scrollbar gap-2">
+                            <div className="flex overflow-x-auto hide-scrollbar gap-2">
                                     {CATEGORIES.map(cat => (
-                                        <button key={cat} onClick={() => setSelectedCategory(cat)}
+                                        <button key={cat} onClick={() => { setSelectedCategory(cat); if (activeTab !== 'dictionary' && activeTab !== 'bookmarks') setActiveTab('dictionary'); }}
                                             className={`px-4 py-1.5 rounded-full text-sm font-medium whitespace-nowrap transition-colors border ${
-                                                selectedCategory === cat
+                                                selectedCategory === cat && activeTab === 'dictionary'
                                                     ? 'bg-brand-500 text-white border-brand-500 shadow-md'
                                                     : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 border-slate-200 dark:border-slate-700 hover:border-brand-300 dark:hover:border-brand-500 hover:text-brand-600 dark:hover:text-brand-400'
                                             }`}>{cat}
                                         </button>
                                     ))}
+                                    {/* Periodic Table Button — always at end of categories */}
+                                    <button
+                                        onClick={() => setActiveTab('periodic-table')}
+                                        className={`flex items-center gap-2 px-4 py-1.5 rounded-full text-sm font-medium whitespace-nowrap transition-colors border ${
+                                            activeTab === 'periodic-table'
+                                                ? 'bg-brand-500 text-white border-brand-500 shadow-md'
+                                                : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 border-slate-200 dark:border-slate-700 hover:border-brand-300 dark:hover:border-brand-500 hover:text-brand-600 dark:hover:text-brand-400'
+                                        }`}
+                                    >
+                                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h18M3 14h18M10 3v18M14 3v18M3 6a3 3 0 013-3h12a3 3 0 013 3v12a3 3 0 01-3 3H6a3 3 0 01-3-3V6z" /></svg>
+                                        Periodic Table
+                                    </button>
                                 </div>
-                            )}
                         </div>
                     </nav>
 
@@ -624,7 +950,15 @@
 
                         {/* Main Grid Area */}
                         <div className="flex-1 overflow-y-auto custom-scrollbar bg-slate-50 dark:bg-slate-900 p-6">
-                            {activeTab === 'bookmarks' ? (
+                            {activeTab === 'periodic-table' ? (
+                                <div>
+                                    <div className="mb-4">
+                                        <h2 className="text-2xl font-serif font-bold text-slate-800 dark:text-white">Periodic Table of Elements</h2>
+                                        <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">Click any element to open its full entry</p>
+                                    </div>
+                                    <PeriodicTableView data={data} onSelectElement={(el) => setSelectedTerm(el)} />
+                                </div>
+                            ) : activeTab === 'bookmarks' ? (
                                 bookmarks.length === 0 ? (
                                     <div className="flex flex-col items-center justify-center h-64 text-slate-400 dark:text-slate-500">
                                         <svg className="w-12 h-12 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M5 3a2 2 0 00-2 2v16l7-3 7 3V5a2 2 0 00-2-2H5z"/></svg>
@@ -674,11 +1008,13 @@
                                         </div>
                                     ) : (
                                         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 pb-20">
-                                            {filteredData.map(item => {
+                                            {filteredData.map((item, idx) => {
                                                 const isBookmarked = bookmarks.some(b => b.term === item.term);
+                                                const delay = Math.min(idx * 0.04, 0.6);
                                                 return (
-                                                    <motion.div key={item.term} onClick={() => setSelectedTerm(item)}
-                                                        className="bg-white dark:bg-slate-800 rounded-2xl p-6 border border-slate-200 dark:border-slate-700 shadow-sm cursor-pointer hover:shadow-lg hover:border-brand-300 dark:hover:border-brand-600 transition-all group flex flex-col h-full"
+                                                    <motion.div key={`${animationKey}-${item.term}`} onClick={() => setSelectedTerm(item)}
+                                                        className="tile-enter bg-white dark:bg-slate-800 rounded-2xl p-6 border border-slate-200 dark:border-slate-700 shadow-sm cursor-pointer hover:shadow-lg hover:border-brand-300 dark:hover:border-brand-600 transition-all group flex flex-col h-full"
+                                                        style={{ animationDelay: `${delay}s` }}
                                                         whileHover={{ y: -4 }} whileTap={{ scale: 0.97 }}
                                                     >
                                                         <div className="flex items-start justify-between mb-4">
@@ -733,73 +1069,75 @@
                                         <div>
                                             <span className="text-xs font-bold uppercase tracking-widest text-brand-500 mb-2 block">
                                                 {displayTerm.category}
-                                                {displayTerm.tag && displayTerm.tag !== 'General' && (
+                                                {displayTerm.sub_category && (
                                                     <>
                                                         <span className="mx-2 opacity-50">•</span>
-                                                        <span className="text-brand-600 dark:text-brand-400">{displayTerm.tag}</span>
+                                                        <span className="text-brand-600 dark:text-brand-400">{displayTerm.sub_category}</span>
                                                     </>
                                                 )}
                                             </span>
-                                            <h2 className="text-3xl md:text-5xl font-serif font-bold text-slate-900 dark:text-white capitalize">
-                                                {displayTerm.term}
-                                            </h2>
+                                            <div className="flex items-center gap-4">
+                                                <h2 className="text-3xl md:text-5xl font-serif font-bold text-slate-900 dark:text-white capitalize">
+                                                    {displayTerm.term}
+                                                </h2>
+                                                {displayTerm.symbol && (
+                                                    <div className="flex flex-col items-center justify-center w-16 h-16 rounded-xl border-2 border-brand-400 dark:border-brand-500 bg-brand-50 dark:bg-brand-900/30 flex-none">
+                                                        <span className="text-[10px] font-semibold text-brand-500 dark:text-brand-400 leading-none">{displayTerm.atomic_number}</span>
+                                                        <span className="text-2xl font-bold text-brand-700 dark:text-brand-300 leading-none">{displayTerm.symbol}</span>
+                                                    </div>
+                                                )}
+                                            </div>
                                         </div>
-                                        <button
-                                            onClick={() => setSelectedTerm(null)}
-                                            className="p-2 bg-slate-100 dark:bg-slate-700 rounded-full text-slate-500 hover:text-slate-800 dark:hover:text-white transition-colors"
-                                        >
-                                            <CloseIcon />
-                                        </button>
+                                        <div className="flex items-center gap-2">
+                                            <button
+                                                onClick={() => {
+                                                    if (window.speechSynthesis.speaking) { window.speechSynthesis.cancel(); return; }
+                                                    const text = `${displayTerm.term}. ${displayTerm.definition}`;
+                                                    const utt = new SpeechSynthesisUtterance(text);
+                                                    utt.rate = 0.95;
+                                                    window.speechSynthesis.speak(utt);
+                                                }}
+                                                className="p-2 bg-slate-100 dark:bg-slate-700 rounded-full text-slate-500 hover:text-brand-600 dark:hover:text-brand-400 transition-colors"
+                                                title="Read aloud"
+                                            >
+                                                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.536 8.464a5 5 0 010 7.072M12 6v12m0 0l-3-3m3 3l3-3M9 9H5a1 1 0 00-1 1v4a1 1 0 001 1h4l5 5V4L9 9z" /></svg>
+                                            </button>
+                                            <button
+                                                onClick={() => setSelectedTerm(null)}
+                                                className="p-2 bg-slate-100 dark:bg-slate-700 rounded-full text-slate-500 hover:text-slate-800 dark:hover:text-white transition-colors"
+                                            >
+                                                <CloseIcon />
+                                            </button>
+                                        </div>
                                     </div>
 
                                     <div className="p-6 md:p-8 overflow-y-auto custom-scrollbar">
                                         <div className="space-y-8">
-                                            <div>
-                                                <h4 className="text-sm font-semibold tracking-wider text-slate-400 dark:text-slate-500 uppercase mb-3 flex items-center gap-2">
-                                                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" /></svg>
-                                                    Definition
-                                                </h4>
-                                                <div className="text-xl text-slate-700 dark:text-slate-200 leading-relaxed relative group">
-                                                    {displayTerm.definition}
+                                            <div className="flex flex-col md:flex-row gap-6 md:items-start">
+                                                <div className="flex-1">
+                                                    <h4 className="text-sm font-semibold tracking-wider text-slate-400 dark:text-slate-500 uppercase mb-3 flex items-center gap-2">
+                                                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" /></svg>
+                                                        Definition
+                                                    </h4>
+                                                    <div className="text-xl text-slate-700 dark:text-slate-200 leading-relaxed relative group">
+                                                        {displayTerm.definition}
 
-                                                    <button
-                                                        onClick={() => handleCopy(displayTerm.definition)}
-                                                        className="absolute -right-4 -top-4 p-2 bg-white dark:bg-slate-700 rounded-lg shadow-md opacity-0 group-hover:opacity-100 transition-all flex items-center gap-2 text-sm font-medium text-slate-600 dark:text-slate-300 hover:text-brand-600 dark:hover:text-brand-400 transform translate-y-2 group-hover:translate-y-0"
-                                                        title="Copy to clipboard"
-                                                    >
-                                                        {copied ? <CheckIcon /> : <CopyIcon />}
-                                                        {copied ? 'Copied!' : 'Copy'}
-                                                    </button>
+                                                        <button
+                                                            onClick={() => handleCopy(displayTerm.definition)}
+                                                            className="absolute -right-4 -top-4 p-2 bg-white dark:bg-slate-700 rounded-lg shadow-md opacity-0 group-hover:opacity-100 transition-all flex items-center gap-2 text-sm font-medium text-slate-600 dark:text-slate-300 hover:text-brand-600 dark:hover:text-brand-400 transform translate-y-2 group-hover:translate-y-0"
+                                                            title="Copy to clipboard"
+                                                        >
+                                                            {copied ? <CheckIcon /> : <CopyIcon />}
+                                                            {copied ? 'Copied!' : 'Copy'}
+                                                        </button>
+                                                    </div>
                                                 </div>
-
-                                                {/* Wikipedia Image */}
-                                                <WikipediaImage term={displayTerm.term} onUrlFound={setWikiUrl} />
                                             </div>
 
-                                            {displayTerm.groupDetails && displayTerm.groupDetails.length > 0 && (
-                                                <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 }}>
-                                                    <h4 className="text-sm font-semibold tracking-wider text-slate-400 dark:text-slate-500 uppercase mb-3 flex items-center gap-2">
-                                                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" /></svg>
-                                                        Element Categories
-                                                    </h4>
-                                                    <div className="flex flex-wrap gap-2 mb-4">
-                                                        {displayTerm.groupDetails.map((gd, idx) => (
-                                                            <button
-                                                                key={idx}
-                                                                onClick={() => setSelectedSubGroup(gd.group)}
-                                                                className={`px-4 py-2 rounded-xl text-sm font-semibold transition-colors border ${selectedSubGroup === gd.group ? 'bg-brand-500 text-white border-brand-500 shadow-sm' : 'bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 border-transparent hover:border-slate-300 dark:hover:border-slate-500'}`}
-                                                            >
-                                                                {gd.group}
-                                                            </button>
-                                                        ))}
-                                                    </div>
-                                                    <div className="p-4 md:p-6 bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-700 dark:text-slate-300 leading-relaxed text-lg">
-                                                        {displayTerm.groupDetails.find(g => g.group === selectedSubGroup)?.details}
-                                                    </div>
-                                                </motion.div>
-                                            )}
+                                            {/* Wikipedia Image */}
+                                            <WikipediaImage term={displayTerm.term} onUrlFound={setWikiUrl} />
 
-                                            {displayTerm.formula && (
+                                            {displayTerm.formula && displayTerm.category !== 'Periodic Table' && (
                                                 <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.05 }}>
                                                     <h4 className="text-sm font-semibold tracking-wider text-slate-400 dark:text-slate-500 uppercase mb-3 flex items-center gap-2">
                                                         <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z" /></svg>
@@ -827,14 +1165,62 @@
                                                 </motion.div>
                                             )}
 
-                                            {displayTerm.related_terms && displayTerm.related_terms.length > 0 && (
+                                            {/* Element-specific: Electron Configuration */}
+                                            {displayTerm.electron_configuration && (
+                                                <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.12 }}>
+                                                    <h4 className="text-sm font-semibold tracking-wider text-slate-400 dark:text-slate-500 uppercase mb-3 flex items-center gap-2">
+                                                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" /></svg>
+                                                        Electron Configuration
+                                                    </h4>
+                                                    <div className="bg-slate-100 dark:bg-slate-900 rounded-xl p-4 border border-slate-200 dark:border-slate-800">
+                                                        <code className="text-lg font-mono text-brand-600 dark:text-brand-400">{displayTerm.electron_configuration}</code>
+                                                    </div>
+                                                </motion.div>
+                                            )}
+
+                                            {/* Element-specific: Crystal Structure */}
+                                            {displayTerm.crystal_structure_type && (
+                                                <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.14 }}>
+                                                    <h4 className="text-sm font-semibold tracking-wider text-slate-400 dark:text-slate-500 uppercase mb-3 flex items-center gap-2">
+                                                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" /></svg>
+                                                        Crystal Structure
+                                                    </h4>
+                                                    <div className="bg-slate-50 dark:bg-slate-900/50 rounded-xl p-4 border border-slate-200 dark:border-slate-800 space-y-1">
+                                                        <p className="font-semibold text-slate-800 dark:text-slate-100 text-sm">{displayTerm.crystal_structure_type}</p>
+                                                        {displayTerm.lattice_parameter_angstrom && <p className="text-xs text-slate-500 dark:text-slate-400">Lattice parameter: {displayTerm.lattice_parameter_angstrom} Å</p>}
+                                                        {displayTerm.crystal_structure_desc && <p className="text-sm text-slate-600 dark:text-slate-300 mt-1">{displayTerm.crystal_structure_desc}</p>}
+                                                    </div>
+                                                </motion.div>
+                                            )}
+
+                                            {/* Element-specific: Processing Methods */}
+                                            {displayTerm.processing_methods && displayTerm.processing_methods.length > 0 && (
+                                                <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.16 }}>
+                                                    <h4 className="text-sm font-semibold tracking-wider text-slate-400 dark:text-slate-500 uppercase mb-3 flex items-center gap-2">
+                                                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" /><circle cx="12" cy="12" r="3" /></svg>
+                                                        Processing Methods
+                                                    </h4>
+                                                    <ul className="space-y-1.5">
+                                                        {displayTerm.processing_methods.map((m, i) => (
+                                                            <li key={i} className="flex items-start gap-2 text-sm text-slate-600 dark:text-slate-300">
+                                                                <span className="mt-1.5 w-1.5 h-1.5 rounded-full bg-brand-500 flex-none" />
+                                                                {m}
+                                                            </li>
+                                                        ))}
+                                                    </ul>
+                                                </motion.div>
+                                            )}
+
+                                            {displayTerm.related_terms && displayTerm.related_terms.filter(rel => data.some(t => t.term.toLowerCase() === rel.toLowerCase())).length > 0 && (
                                                 <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}>
                                                     <h4 className="text-sm font-semibold tracking-wider text-slate-400 dark:text-slate-500 uppercase mb-3 flex items-center gap-2">
                                                         <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" /></svg>
                                                         Related Terms
                                                     </h4>
                                                     <div className="flex flex-wrap gap-2">
-                                                        {displayTerm.related_terms.map((rel, idx) => (
+                                                        {displayTerm.related_terms
+                                                            .filter(rel => data.some(t => t.term.toLowerCase() === rel.toLowerCase()))
+                                                            .map((rel, idx) => (
                                                             <span
                                                                 key={idx}
                                                                 onClick={() => {
@@ -842,7 +1228,8 @@
                                                                     if (targetTerm) {
                                                                         setSelectedCategory('All');
                                                                         setSelectedAlphabet(null);
-                                                                        setSearchTerm('');
+                                                                        setActiveSearch('');
+                                                                        setSearchInput('');
                                                                         setSelectedTerm(targetTerm);
                                                                     }
                                                                 }}
@@ -952,7 +1339,9 @@
                                                 ? 'bg-brand-500 text-white rounded-br-none'
                                                 : msg.error
                                                     ? 'bg-red-50 text-red-600 border border-red-200 dark:bg-red-900/30 dark:text-red-400 dark:border-red-800 rounded-bl-none'
-                                                    : 'bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-200 border border-slate-200 dark:border-slate-700 rounded-bl-none shadow-sm'
+                                                    : msg.stopped
+                                                        ? 'bg-amber-50 dark:bg-amber-900/20 text-slate-700 dark:text-slate-300 border border-amber-200 dark:border-amber-800 rounded-bl-none shadow-sm'
+                                                        : 'bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-200 border border-slate-200 dark:border-slate-700 rounded-bl-none shadow-sm'
                                             }`}>
                                                 {msg.role === 'assistant' && !msg.content && msg.streaming ? (
                                                     <div className="flex gap-1.5 items-center h-4 py-2">
@@ -961,10 +1350,18 @@
                                                         <div className="w-1.5 h-1.5 bg-brand-400 rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></div>
                                                     </div>
                                                 ) : (
-                                                    <p className="whitespace-pre-wrap text-[15px] leading-relaxed font-serif">
-                                                        {msg.content}
-                                                        {msg.streaming && <span className="inline-block w-0.5 h-4 bg-current ml-0.5 animate-pulse align-middle" />}
-                                                    </p>
+                                                    <>
+                                                        <p className="whitespace-pre-wrap text-[15px] leading-relaxed font-sans">
+                                                            {renderMarkdown(msg.content)}
+                                                            {msg.streaming && <span className="inline-block w-0.5 h-4 bg-current ml-0.5 animate-pulse align-middle" />}
+                                                        </p>
+                                                        {msg.stopped && (
+                                                            <div className="flex items-center gap-1.5 mt-2 pt-2 border-t border-amber-200 dark:border-amber-800 text-xs text-amber-600 dark:text-amber-400 font-medium">
+                                                                <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 9v6m4-6v6m7-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                                                                Generation stopped by user
+                                                            </div>
+                                                        )}
+                                                    </>
                                                 )}
                                             </div>
                                         </div>
@@ -973,6 +1370,17 @@
                                 </div>
 
                                 <div className="p-4 border-t border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800">
+                                    {isChatLoading && (
+                                        <div className="mb-2 flex justify-center">
+                                            <button
+                                                onClick={handleStopChat}
+                                                className="flex items-center gap-2 px-4 py-1.5 bg-red-50 dark:bg-red-900/30 hover:bg-red-100 dark:hover:bg-red-900/50 text-red-600 dark:text-red-400 border border-red-200 dark:border-red-800 rounded-full text-sm font-semibold transition-colors"
+                                            >
+                                                <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><rect x="6" y="6" width="12" height="12" rx="2" /></svg>
+                                                Stop generation
+                                            </button>
+                                        </div>
+                                    )}
                                     <div className="flex gap-2">
                                         <input
                                             type="text"
@@ -1055,6 +1463,100 @@
                                                     </button>
                                                 ))}
                                             </div>
+                                        </div>
+
+                                        {/* Feedback Form */}
+                                        <div>
+                                            <h3 className="text-sm font-semibold uppercase tracking-wider text-slate-400 dark:text-slate-500 mb-4">Feedback</h3>
+                                            <a
+                                                href="https://forms.gle/RELVHTJ7jdjW33Bm6"
+                                                target="_blank"
+                                                rel="noopener noreferrer"
+                                                className="flex items-center justify-center gap-3 w-full px-5 py-3.5 rounded-xl border-2 border-brand-300 dark:border-brand-700 bg-brand-50 dark:bg-brand-900/20 text-brand-700 dark:text-brand-300 font-semibold hover:bg-brand-100 dark:hover:bg-brand-900/40 hover:border-brand-500 transition-all shadow-sm hover:shadow-md hover:-translate-y-0.5"
+                                            >
+                                                <svg className="w-5 h-5 flex-none" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
+                                                Feedback Form
+                                            </a>
+                                        </div>
+                                    </div>
+                                </motion.div>
+                            </>
+                        )}
+                    </AnimatePresence>
+
+                    {/* Focus Mode Modal */}
+                    <AnimatePresence>
+                        {isFocusOpen && (
+                            <>
+                                <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+                                    onClick={() => { setIsFocusOpen(false); focusPause(); }}
+                                    className="fixed inset-0 bg-black/50 backdrop-blur-md z-50"
+                                />
+                                <motion.div initial={{ opacity: 0, scale: 0.92, y: 20 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.92, y: 20 }}
+                                    transition={{ type: 'spring', damping: 26, stiffness: 280 }}
+                                    className="fixed inset-0 m-auto h-fit max-h-[90vh] w-[92%] max-w-sm bg-white dark:bg-slate-800 rounded-3xl shadow-2xl flex flex-col z-50 overflow-hidden border border-slate-200 dark:border-slate-700"
+                                >
+                                    {/* Header */}
+                                    <div className="flex items-center justify-between px-6 py-4 border-b border-slate-100 dark:border-slate-700">
+                                        <div className="flex items-center gap-2 text-brand-600 dark:text-brand-400">
+                                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                                            <h2 className="text-lg font-bold text-slate-800 dark:text-white">Focus Mode</h2>
+                                        </div>
+                                        <button onClick={() => { setIsFocusOpen(false); focusPause(); }} className="p-2 rounded-full hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-500 transition-colors"><CloseIcon /></button>
+                                    </div>
+
+                                    <div className="p-6 space-y-6 overflow-y-auto custom-scrollbar">
+                                        {/* Quote */}
+                                        <div className="bg-brand-50 dark:bg-brand-900/20 rounded-2xl p-4 border border-brand-100 dark:border-brand-800/50 text-center">
+                                            <p className="text-sm italic text-slate-700 dark:text-slate-300 leading-relaxed">"{FOCUS_QUOTES[focusQuote].q}"</p>
+                                            <p className="text-xs font-semibold text-brand-600 dark:text-brand-400 mt-2">— {FOCUS_QUOTES[focusQuote].a}</p>
+                                        </div>
+
+                                        {/* Timer display */}
+                                        <div className="flex flex-col items-center gap-3">
+                                            <div className={`w-40 h-40 rounded-full border-4 ${focusRunning ? 'border-brand-400 focus-pulse' : focusSecondsLeft === 0 ? 'border-brand-300' : 'border-slate-200 dark:border-slate-600'} flex items-center justify-center transition-all duration-500`}>
+                                                <span className="text-4xl font-bold font-mono text-slate-800 dark:text-white tabular-nums">
+                                                    {focusMM}:{focusSS}
+                                                </span>
+                                            </div>
+                                            {focusSecondsLeft === 0 && (
+                                                <p className="text-sm font-semibold text-brand-600 dark:text-brand-400 animate-pulse">🎉 Time's up! Great session!</p>
+                                            )}
+                                        </div>
+
+                                        {/* Minutes selector */}
+                                        <div>
+                                            <p className="text-xs font-semibold uppercase tracking-wider text-slate-400 dark:text-slate-500 mb-2 text-center">Set Duration (minutes)</p>
+                                            <div className="flex gap-2 justify-center flex-wrap">
+                                                {[5, 10, 15, 25, 30, 45, 60].map(m => (
+                                                    <button key={m} onClick={() => { setFocusMinutes(m); setFocusSecondsLeft(m * 60); setFocusRunning(false); if(focusIntervalRef.current){clearInterval(focusIntervalRef.current);focusIntervalRef.current=null;} }}
+                                                        className={`px-3 py-1.5 rounded-full text-sm font-semibold border-2 transition-all ${focusMinutes === m && !focusRunning ? 'border-brand-500 bg-brand-50 dark:bg-brand-900/20 text-brand-700 dark:text-brand-300' : 'border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-400 hover:border-brand-300'}`}
+                                                    >{m}</button>
+                                                ))}
+                                            </div>
+                                        </div>
+
+                                        {/* Controls */}
+                                        <div className="flex gap-2 justify-center flex-wrap">
+                                            {!focusRunning ? (
+                                                <button onClick={focusStart} disabled={focusSecondsLeft === 0}
+                                                    className="flex items-center gap-2 px-5 py-2.5 bg-brand-500 hover:bg-brand-600 disabled:opacity-40 text-white rounded-full font-semibold shadow-md transition-all">
+                                                    <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg> Start
+                                                </button>
+                                            ) : (
+                                                <button onClick={focusPause}
+                                                    className="flex items-center gap-2 px-5 py-2.5 bg-amber-500 hover:bg-amber-600 text-white rounded-full font-semibold shadow-md transition-all">
+                                                    <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg> Pause
+                                                </button>
+                                            )}
+                                            <button onClick={focusStop}
+                                                className="flex items-center gap-2 px-5 py-2.5 bg-red-500 hover:bg-red-600 text-white rounded-full font-semibold shadow-md transition-all">
+                                                <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M6 6h12v12H6z"/></svg> Stop
+                                            </button>
+                                            <button onClick={focusAddFive}
+                                                className="flex items-center gap-2 px-5 py-2.5 bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-300 rounded-full font-semibold transition-all border border-slate-200 dark:border-slate-600">
+                                                +5 min
+                                            </button>
                                         </div>
                                     </div>
                                 </motion.div>
