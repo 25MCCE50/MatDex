@@ -11695,91 +11695,10 @@ const allMatDexData = [
     "related_terms": []
   },
   {
-    "term": "Theoretical Density (ρ)",
-    "definition": "",
-    "category": "Laws & Equations",
-    "sub_category": "Crystal Structure",
-    "formula": "ρ = (Z × A) / (Nₐ × a³)",
-    "applications": [],
-    "related_terms": []
-  },
-  {
-    "term": "Interplanar Spacing (d-spacing)",
-    "definition": "",
-    "category": "Laws & Equations",
-    "sub_category": "Crystal Structure",
-    "formula": "",
-    "applications": [],
-    "related_terms": []
-  },
-  {
-    "term": "Angle Between Two Planes (Cubic)",
-    "definition": "",
-    "category": "Laws & Equations",
-    "sub_category": "Crystal Structure",
-    "formula": "cosφ = |(h₁h₂ + k₁k₂ + l₁l₂)| / [√(h₁²+k₁²+l₁²) × √(h₂²+k₂²+l₂²)]",
-    "applications": [],
-    "related_terms": []
-  },
-  {
     "term": "Burgers Vector Magnitude",
     "definition": "Determining the yield strength of a material by affecting solute hardening ,precipitation hardening and work hardening",
     "category": "Laws & Equations",
     "sub_category": "Heat Treatment",
-    "formula": "",
-    "applications": [],
-    "related_terms": []
-  },
-  {
-    "term": "Equilibrium Vacancy Concentration",
-    "definition": "",
-    "category": "Laws & Equations",
-    "sub_category": "Defects",
-    "formula": "nᵥ = N · exp(−Qᵥ / kB·T)",
-    "applications": [],
-    "related_terms": []
-  },
-  {
-    "term": "Frenkel Defect Concentration",
-    "definition": "",
-    "category": "Laws & Equations",
-    "sub_category": "Defects",
-    "formula": "nF = (NN*)^1/2 · exp(−Delta H / 2RT)",
-    "applications": [],
-    "related_terms": []
-  },
-  {
-    "term": "Schottky Defect Concentration",
-    "definition": "",
-    "category": "Laws & Equations",
-    "sub_category": "Defects",
-    "formula": "nS = N · exp(−  Delta H/ 2RT)",
-    "applications": [],
-    "related_terms": []
-  },
-  {
-    "term": "Dislocation Density",
-    "definition": "",
-    "category": "Laws & Equations",
-    "sub_category": "Defects",
-    "formula": "ρD = total dislocation line length / volume  (m⁻²)",
-    "applications": [],
-    "related_terms": []
-  },
-  {
-    "term": "Miller-Bravais or 4-index Notation(Hexagonal)",
-    "definition": "",
-    "category": "Laws & Equations",
-    "sub_category": "Crystal Structure",
-    "formula": "(hkil)  where  i = −(h + k)",
-    "applications": [],
-    "related_terms": []
-  },
-  {
-    "term": "Linear and Planar Density",
-    "definition": "",
-    "category": "Laws & Equations",
-    "sub_category": "Crystal Structure",
     "formula": "",
     "applications": [],
     "related_terms": []
@@ -11830,24 +11749,6 @@ const allMatDexData = [
     "category": "Laws & Equations",
     "sub_category": "Phase Diagrams",
     "formula": "Wα = (Cβ − C₀) / (Cβ − Cα)",
-    "applications": [],
-    "related_terms": []
-  },
-  {
-    "term": "Lever Rule — Weight Fraction of Beta Phase",
-    "definition": "",
-    "category": "Laws & Equations",
-    "sub_category": "Phase Diagrams",
-    "formula": "Wβ = (C₀ − Cα) / (Cβ − Cα)",
-    "applications": [],
-    "related_terms": []
-  },
-  {
-    "term": "Lever Rule — Mass from Weight Fraction",
-    "definition": "",
-    "category": "Laws & Equations",
-    "sub_category": "Phase Diagrams",
-    "formula": "Mass of phase = W × Total Mass",
     "applications": [],
     "related_terms": []
   },
@@ -11932,42 +11833,6 @@ const allMatDexData = [
       "Semiconductor doping analysis",
       "PN junction design"
     ],
-    "related_terms": []
-  },
-  {
-    "term": "Electrical Conductivity",
-    "definition": "",
-    "category": "Laws & Equations",
-    "sub_category": "Electrical Properties",
-    "formula": "σ = 1/ρ",
-    "applications": [],
-    "related_terms": []
-  },
-  {
-    "term": "Current Density",
-    "definition": "",
-    "category": "Laws & Equations",
-    "sub_category": "Crystal Structure",
-    "formula": "J = σE",
-    "applications": [],
-    "related_terms": []
-  },
-  {
-    "term": "Semiconductor Conductivity",
-    "definition": "",
-    "category": "Laws & Equations",
-    "sub_category": "Electrical Properties",
-    "formula": "σ = nqμ",
-    "applications": [],
-    "related_terms": []
-  },
-  {
-    "term": "Energy Band Gap",
-    "definition": "",
-    "category": "Laws & Equations",
-    "sub_category": "Electrical Properties",
-    "formula": "Eg = Ec − Ev",
-    "applications": [],
     "related_terms": []
   },
   {
