@@ -517,7 +517,9 @@
             const [copied, setCopied] = useState(false);
 
             const [isChatOpen, setIsChatOpen] = useState(false);
-            const [chatMessages, setChatMessages] = useState([]);
+            const [chatMessages, setChatMessages] = useState(() => {
+                try { return JSON.parse(localStorage.getItem('matdex-chat-history') || '[]'); } catch { return []; }
+            });
             const [chatInput, setChatInput] = useState('');
             const [isChatLoading, setIsChatLoading] = useState(false);
             const chatEndRef = useRef(null);
@@ -530,7 +532,7 @@
             // Settings
             const [isSettingsOpen, setIsSettingsOpen] = useState(false);
             const [fontSize, setFontSize] = useState(() => localStorage.getItem('matdex-fontsize') || 'medium');
-            const [theme, setTheme] = useState(() => { const saved = localStorage.getItem('matdex-theme'); return (saved && THEMES[saved]) ? saved : 'light-sky'; });
+            const [theme, setTheme] = useState(() => { const saved = localStorage.getItem('matdex-theme'); return (saved && THEMES[saved]) ? saved : 'dark-sky'; });
             const [animationKey, setAnimationKey] = useState(0);
 
             // Focus Mode
@@ -589,6 +591,12 @@
                 }
             }, [chatMessages]);
 
+            // Persist chat history to localStorage (skip streaming/in-progress messages)
+            useEffect(() => {
+                const toSave = chatMessages.filter(m => !m.streaming);
+                try { localStorage.setItem('matdex-chat-history', JSON.stringify(toSave)); } catch { /* storage quota */ }
+            }, [chatMessages]);
+
             const toggleBookmark = (item) => {
                 setBookmarks(prev => {
                     const exists = prev.some(b => b.term === item.term);
@@ -596,6 +604,16 @@
                     localStorage.setItem('matdex-bookmarks', JSON.stringify(next));
                     return next;
                 });
+            };
+
+            const clearAllBookmarks = () => {
+                setBookmarks([]);
+                localStorage.removeItem('matdex-bookmarks');
+            };
+
+            const clearChat = () => {
+                setChatMessages([]);
+                localStorage.removeItem('matdex-chat-history');
             };
 
             const handleStopChat = () => {
