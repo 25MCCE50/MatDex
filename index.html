@@ -895,6 +895,24 @@
                                                     </div>
                                                 </button>
                                             ))}
+                                            {/* Ask AI — always last */}
+                                            <button
+                                                onClick={() => {
+                                                    const query = searchInput.trim();
+                                                    setShowSuggestions(false);
+                                                    setIsChatOpen(true);
+                                                    setTimeout(() => handleSendChatMessage(`Define "${query}" in the context of material science.`), 150);
+                                                }}
+                                                className="w-full flex items-center gap-4 px-6 py-4 bg-gradient-to-r from-brand-50 to-indigo-50 dark:from-brand-900/20 dark:to-indigo-900/20 hover:from-brand-100 hover:to-indigo-100 dark:hover:from-brand-900/40 dark:hover:to-indigo-900/40 transition-colors text-left border-t-2 border-brand-100 dark:border-brand-900/40"
+                                            >
+                                                <div className="w-8 h-8 rounded-full bg-gradient-to-br from-brand-500 to-indigo-500 flex items-center justify-center flex-none shadow-sm">
+                                                    <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" /></svg>
+                                                </div>
+                                                <div className="flex-1 min-w-0">
+                                                    <p className="font-bold text-brand-700 dark:text-brand-300 text-sm">Ask AI about "<span className="italic">{searchInput.trim()}</span>"</p>
+                                                    <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Get a detailed AI explanation →</p>
+                                                </div>
+                                            </button>
                                         </div>
                                     )}
                                 </div>

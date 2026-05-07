@@ -4982,7 +4982,7 @@ const allMatDexData = [
   {
     "term": "acceptor state",
     "definition": "An energy level introduced near the valence band of a semiconductor by substituting a dopant atom with fewer valence electrons, which accepts electrons and creates mobile positive holes.",
-    "category": "Phenomena",
+    "category": "Properties",
     "sub_category": "Crystal Structure",
     "formula": "",
     "applications": [
