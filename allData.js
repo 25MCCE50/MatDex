@@ -10010,23 +10010,7 @@ const allMatDexData = [
       "Ceramic"
     ]
   },
-  {
-    "term": "Agglomeration",
-    "definition": "The physical process where individual nanoparticles clump or cluster together due to van der Waals forces or electromagnetic interactions, often reducing their effective surface area and altering their nanoscale properties.",
-    "category": "Materials",
-    "sub_category": "Composites",
-    "formula": "",
-    "applications": [
-      "Powder metallurgy",
-      "Water filtration processes",
-      "Controlling drug delivery release rates"
-    ],
-    "related_terms": [
-      "Aggregation",
-      "Van der Waals Forces",
-      "Dispersion"
-    ]
-  },
+
   {
     "term": "Alloy Nanoparticle",
     "definition": "A nanoscale particle composed of a homogeneous mixture or solid solution of two or more metallic elements, specifically engineered to exhibit synergistic catalytic, optical, or magnetic properties not found in pure metals.",

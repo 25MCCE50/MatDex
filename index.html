@@ -1255,43 +1255,17 @@
                                             {/* Wikipedia Image */}
                                             <WikipediaImage term={displayTerm.term} onUrlFound={setWikiUrl} />
 
-                                            {displayTerm.formula && displayTerm.category !== 'Periodic Table' && (() => {
-                                                const syms = parseFormulaSymbols(displayTerm.formula);
-                                                // Strip the parenthetical description from the displayed formula
-                                                const cleanFormula = displayTerm.formula.replace(/\s*\([^)]*\)\s*$/, '').trim();
-                                                return (
-                                                    <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.05 }}>
-                                                        <h4 className="text-sm font-semibold tracking-wider text-slate-400 dark:text-slate-500 uppercase mb-3 flex items-center gap-2">
-                                                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z" /></svg>
-                                                            Formula / Equation
-                                                        </h4>
-                                                        <div className="bg-slate-100 dark:bg-slate-900 rounded-xl p-4 md:p-6 border border-slate-200 dark:border-slate-800">
-                                                            <code className="text-lg md:text-xl font-mono text-brand-600 dark:text-brand-400">{cleanFormula}</code>
-                                                        </div>
-                                                        {syms.length > 0 && (
-                                                            <div className="mt-3">
-                                                                <p className="text-xs font-semibold uppercase tracking-wider text-slate-400 dark:text-slate-500 mb-2 flex items-center gap-1.5">
-                                                                    <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-                                                                    Symbol Descriptions
-                                                                </p>
-                                                                <div className="rounded-xl border border-slate-200 dark:border-slate-700 overflow-hidden">
-                                                                    <table className="w-full text-sm">
-                                                                        <tbody>
-                                                                            {syms.map((s, i) => (
-                                                                                <tr key={i} className={`${i % 2 === 0 ? 'bg-white dark:bg-slate-800' : 'bg-slate-50 dark:bg-slate-800/50'}`}>
-                                                                                    {s.sym && <td className="px-4 py-2 font-mono font-bold text-brand-600 dark:text-brand-400 whitespace-nowrap w-1">{s.sym}</td>}
-                                                                                    {!s.sym && <td className="px-4 py-2" />}
-                                                                                    <td className="px-4 py-2 text-slate-600 dark:text-slate-300">{s.desc}</td>
-                                                                                </tr>
-                                                                            ))}
-                                                                        </tbody>
-                                                                    </table>
-                                                                </div>
-                                                            </div>
-                                                        )}
-                                                    </motion.div>
-                                                );
-                                            })()}
+                                            {displayTerm.formula && displayTerm.category !== 'Periodic Table' && (
+                                                <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.05 }}>
+                                                    <h4 className="text-sm font-semibold tracking-wider text-slate-400 dark:text-slate-500 uppercase mb-3 flex items-center gap-2">
+                                                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z" /></svg>
+                                                        Formula / Equation
+                                                    </h4>
+                                                    <div className="bg-slate-100 dark:bg-slate-900 rounded-xl p-4 md:p-6 border border-slate-200 dark:border-slate-800">
+                                                        <code className="text-lg md:text-xl font-mono text-brand-600 dark:text-brand-400">{displayTerm.formula}</code>
+                                                    </div>
+                                                </motion.div>
+                                            )}
 
                                             {displayTerm.applications && displayTerm.applications.length > 0 && (
                                                 <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
