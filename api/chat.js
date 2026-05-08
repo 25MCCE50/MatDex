@@ -1,4 +1,4 @@
-require('dotenv').config();
+// Note: Vercel injects env vars automatically. dotenv not needed here.
 
 const PRIMARY_KEY = process.env.NVIDIA_API_KEY_PRIMARY;
 const SECONDARY_KEY = process.env.NVIDIA_API_KEY_SECONDARY;

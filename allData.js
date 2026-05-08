@@ -2448,40 +2448,7 @@ const allMatDexData = [
       "Diffusion"
     ]
   },
-  {
-    "term": "Cell",
-    "definition": "The basic structural, functional, and biological unit of all known living organisms. It relies heavily on diffusion for the intake of nutrients and removal of waste.",
-    "category": "Phenomena",
-    "sub_category": "Diffusion",
-    "formula": "",
-    "applications": [
-      "Microbiology",
-      "Genetic engineering",
-      "Medical diagnostics"
-    ],
-    "related_terms": [
-      "Cytoplasm",
-      "Organelle",
-      "Tissue"
-    ]
-  },
-  {
-    "term": "Cell Membrane",
-    "definition": "A selectively permeable biological lipid bilayer enclosing a cell, which regulates the diffusion and transport of substances like ions and organic molecules in and out of the cell.",
-    "category": "Phenomena",
-    "sub_category": "Diffusion",
-    "formula": "",
-    "applications": [
-      "Drug delivery targeting",
-      "Dialysis",
-      "Cell signaling research"
-    ],
-    "related_terms": [
-      "Phospholipid Bilayer",
-      "Selective Membrane",
-      "Osmosis"
-    ]
-  },
+
   {
     "term": "Collision",
     "definition": "The event where two or more moving particles exert forces on each other in a relatively short time, driving phenomena like Brownian motion and diffusion rates.",
@@ -2550,23 +2517,7 @@ const allMatDexData = [
       "Pressure"
     ]
   },
-  {
-    "term": "Cytoplasm",
-    "definition": "The thick, jelly-like fluid that fills the inside of a cell, serving as the medium through which cellular materials, enzymes, and nutrients diffuse.",
-    "category": "Phenomena",
-    "sub_category": "Diffusion",
-    "formula": "",
-    "applications": [
-      "Cell biology",
-      "Metabolic pathway tracking",
-      "Gene therapy"
-    ],
-    "related_terms": [
-      "Cell",
-      "Organelle",
-      "Intracellular Fluid"
-    ]
-  },
+
   {
     "term": "Diffusion",
     "definition": "The net passive movement of particles (atoms, ions, or molecules) from a region of higher concentration to a region of lower concentration until uniform distribution is reached.",
@@ -3128,23 +3079,7 @@ const allMatDexData = [
       "Gradient"
     ]
   },
-  {
-    "term": "Respiration",
-    "definition": "The biochemical process in living organisms involving the production of energy (ATP), which depends entirely on the diffusion of oxygen into cells and carbon dioxide out.",
-    "category": "Phenomena",
-    "sub_category": "Diffusion",
-    "formula": "C6H12O6 + 6O2 → 6CO2 + 6H2O + ATP (Cellular Respiration)",
-    "applications": [
-      "Medical ventilators",
-      "Sports physiology",
-      "Fermentation processes"
-    ],
-    "related_terms": [
-      "Exchange Surface",
-      "Oxygen",
-      "Active Transport"
-    ]
-  },
+
   {
     "term": "Selective Membrane",
     "definition": "A physical or biological barrier that purposefully chooses which molecules or ions can pass through it based on size, charge, or specific transport channels.",
@@ -3298,23 +3233,7 @@ const allMatDexData = [
       "Rate"
     ]
   },
-  {
-    "term": "Tissue",
-    "definition": "A cellular organizational level consisting of an ensemble of similar biological cells and their extracellular matrix working together, relying on diffusion for nutrient delivery across cell layers.",
-    "category": "Phenomena",
-    "sub_category": "Diffusion",
-    "formula": "",
-    "applications": [
-      "Histology",
-      "Organ transplants",
-      "Tissue engineering"
-    ],
-    "related_terms": [
-      "Cell",
-      "Exchange Surface",
-      "Respiration"
-    ]
-  },
+
   {
     "term": "Transport",
     "definition": "The overall physical or biological mechanism of moving substances from one location to another, encompassing active transport, passive diffusion, and bulk flow.",
